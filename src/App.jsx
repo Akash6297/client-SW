@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import Services from './pages/Services';
 import About from './pages/About';
 import CardCreator from './components/CardCreator';
+import Contact from './pages/Contact';
 
 function App() {
   const isLoggedIn = true; // Temporary for testing
@@ -20,7 +21,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
-            <Route path="/services" element={<Services />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/create" element={<CardCreator isLoggedIn={isLoggedIn} />} />
           </Routes>
         </main>

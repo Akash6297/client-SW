@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
+import AkashPhoto from '../assets/Akash.png';
 export default function Footer() {
   // Animation settings for the moving text
   const marqueeVariants = {
@@ -88,7 +88,7 @@ export default function Footer() {
           <div className="flex items-center gap-4 mb-6 md:mb-0">
             <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center grayscale hover:grayscale-0 transition-all duration-500 overflow-hidden border border-slate-200">
                {/* Small version of your photo */}
-               <img src="/src/assets/Akash.png" alt="Akash" className="w-full h-full object-cover scale-150" />
+               <img src={AkashPhoto} alt="Akash" className="w-full h-full object-cover scale-150" />
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               Owned & Curated by <span className="text-slate-900">Akash Mandal</span>
