@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -8,6 +9,19 @@ import CardCreator from './components/CardCreator';
 import Contact from './pages/Contact';
 
 function App() {
+  useEffect(() => {
+    // Restrict Right-Click
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+    };
+    document.addEventListener('contextmenu', handleContextMenu);
+    
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []);
+
+
   const isLoggedIn = true; // Temporary for testing
 
   return (

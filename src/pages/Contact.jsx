@@ -6,6 +6,39 @@ import { FaXTwitter } from 'react-icons/fa6'; // Latest X logo
 
 export default function Contact() {
   const [activeFaq, setActiveFaq] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
+
+  // Form State
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // PASTE YOUR GOOGLE SCRIPT URL HERE
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnIHn5oGvhWs5cg5ChyvUbXzha-c13yzTzdoO5GG23QvSHVZ0KjBK1nKC4Sx8JIEGKsw/exec";
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+      setStatus("success");
+      setFormData({ fullName: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setStatus(""), 5000);
+    }
+  };
 
   const faqs = [
     {
@@ -109,24 +142,34 @@ export default function Contact() {
             transition={{ delay: 0.4 }}
             className="bg-slate-50 p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-sm"
           >
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormInput label="Full Name" type="text" placeholder="John Doe" />
-                <FormInput label="Email Address" type="email" placeholder="john@example.com" />
-              </div>
-              <FormInput label="Subject" type="text" placeholder="Inquiry about Portfolio Design" />
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
-                <textarea 
-                  rows="5" 
-                  className="w-full p-4 bg-white rounded-2xl border-none focus:ring-4 ring-brand-primary/10 outline-none transition-all resize-none"
-                  placeholder="Tell us about your project goals..."
-                ></textarea>
-              </div>
-              <button className="w-full py-5 bg-brand-dark text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-2xl hover:bg-brand-primary transition-all duration-500">
-                Send Message
-              </button>
-            </form>
+             <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+            <input required value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} type="text" className="w-full p-4 bg-white rounded-2xl border-none focus:ring-4 ring-brand-primary/10 outline-none text-slate-900" />
+        </div>
+        <div className="space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+            <input required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} type="email" className="w-full p-4 bg-white rounded-2xl border-none focus:ring-4 ring-brand-primary/10 outline-none text-slate-900" />
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Subject</label>
+          <input required value={formData.subject} onChange={(e) => setFormData({...formData, subject: e.target.value})} type="text" className="w-full p-4 bg-white rounded-2xl border-none focus:ring-4 ring-brand-primary/10 outline-none text-slate-900" />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
+        <textarea required value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})} rows="5" className="w-full p-4 bg-white rounded-2xl border-none focus:ring-4 ring-brand-primary/10 outline-none transition-all resize-none"></textarea>
+      </div>
+
+      <button disabled={loading} className="w-full py-5 bg-brand-dark text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-xs shadow-2xl hover:bg-brand-primary transition-all disabled:bg-slate-400">
+        {loading ? "Sending Strategy..." : status === "success" ? "Message Received!" : "Send Message"}
+      </button>
+      
+      {status === "error" && <p className="text-rose-500 text-[10px] font-bold text-center uppercase">Error sending. Please try again.</p>}
+    </form>
           </motion.div>
         </div>
 
