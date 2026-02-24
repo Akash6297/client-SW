@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import QRCode from 'react-qr-code';
 import { motion } from 'framer-motion';
-import { FiCamera, FiRefreshCw, FiMail, FiPhone, FiDownload, FiSettings, FiBriefcase, FiLayers, FiLink, FiType } from 'react-icons/fi';
+import { FiCamera, FiRefreshCw, FiMail, FiPhone, FiDownload, FiSettings, FiBriefcase, FiLayers, FiLink, FiType, FiShield, FiCheckCircle } from 'react-icons/fi';
 import { FaInstagram, FaFacebookF, FaLinkedinIn, FaGithub, FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
 
 export default function CardCreator({ isLoggedIn }) {
@@ -19,7 +19,7 @@ export default function CardCreator({ isLoggedIn }) {
   const [color1, setColor1] = useState('#2563eb'); 
   const [color2, setColor2] = useState('#a855f7'); 
   const [selectedPattern, setSelectedPattern] = useState('network');
-  const [selectedFont, setSelectedFont] = useState('Modern'); // NEW: Font State
+  const [selectedFont, setSelectedFont] = useState('Modern');
 
   const [socialSlots, setSocialSlots] = useState({
     slot1: 'instagram',
@@ -48,7 +48,6 @@ export default function CardCreator({ isLoggedIn }) {
     clean: 'none'
   };
 
-  // NEW: Font Library
   const fontFamilies = {
     Modern: 'Inter, system-ui, sans-serif',
     Elegant: 'Georgia, serif',
@@ -78,19 +77,45 @@ export default function CardCreator({ isLoggedIn }) {
     }
   };
 
+  // --- CORE RAZORPAY & DOWNLOAD LOGIC ---
+  const triggerActualDownload = () => {
+    toPng(downloadRef.current, { cacheBust: true, pixelRatio: 3, skipFonts: true })
+      .then((url) => {
+        const link = document.createElement('a');
+        link.download = `SmoothWeb-${data.name}-${activeSide}.png`;
+        link.href = url;
+        link.click();
+        setIsDownloading(false);
+      }).catch(() => setIsDownloading(false));
+  };
+
   const downloadCard = async () => {
-    if (!isLoggedIn) return alert("🔒 Please login to SmoothWeb to download!");
-    setIsDownloading(true);
-    setTimeout(() => {
-        toPng(downloadRef.current, { cacheBust: true, pixelRatio: 3, skipFonts: true })
-          .then((url) => {
-            const link = document.createElement('a');
-            link.download = `SmoothWeb-${data.name}-${activeSide}.png`;
-            link.href = url;
-            link.click();
-            setIsDownloading(false);
-          }).catch(() => setIsDownloading(false));
-    }, 500);
+    if (!isLoggedIn) return alert("🔒 Please login to SmoothWeb to start!");
+    
+    // RAZORPAY PAYMENT CONFIGURATION
+    const options = {
+      key: "rzp_live_SC0sXa0djHiAbC", // YOUR API KEY FROM SCREENSHOT
+      amount: 900, // Amount in paise (₹9 = 900)
+      currency: "INR",
+      name: "SmoothWeb Digital",
+      description: `Premium Digital Card for ${data.name}`,
+      image: "/favicon.png",
+      handler: function (response) {
+        // Only run download if payment is successful
+        setIsDownloading(true);
+        setTimeout(triggerActualDownload, 500);
+      },
+      prefill: {
+        name: data.name,
+        email: data.email,
+        contact: data.phone
+      },
+      theme: { color: "#2563eb" },
+      modal: { ondismiss: () => setIsDownloading(false) }
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.open();
   };
 
   const CardContent = () => (
@@ -98,7 +123,7 @@ export default function CardCreator({ isLoggedIn }) {
         className="w-[500px] h-[300px] rounded-[15px] p-8 relative shadow-2xl overflow-hidden flex flex-col justify-between text-white"
         style={{ 
             background: `linear-gradient(to right, ${color1}, ${color2})`,
-            fontFamily: fontFamilies[selectedFont] // APPLYING DYNAMIC FONT
+            fontFamily: fontFamilies[selectedFont]
         }}
     >
         <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: patterns[selectedPattern], backgroundSize: selectedPattern === 'dots' ? '20px' : '100px' }}></div>
@@ -115,7 +140,7 @@ export default function CardCreator({ isLoggedIn }) {
                             <p className="text-[11px] font-bold opacity-75 uppercase tracking-[0.2em] mt-2">{data.role}</p>
                         </div>
                     </div>
-                    <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center border border-white overflow-hidden">
+                    <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center border border-white overflow-hidden text-slate-900">
                         {useLogoOnFront && businessLogo ? (
                           <img src={businessLogo} className="w-full h-full object-contain p-2" alt="Logo" />
                         ) : (
@@ -124,7 +149,7 @@ export default function CardCreator({ isLoggedIn }) {
                     </div>
                 </div>
                 <div className="text-center px-4">
-                    <p className="text-sm font-bold italic opacity-95">"{data.bio}"</p>
+                    <p className="text-sm font-black italic opacity-95">"{data.bio}"</p>
                 </div>
                 <div className="flex justify-center items-center gap-8 text-[11px] font-black uppercase tracking-tighter">
                     <div className="flex items-center gap-2"><FiMail /> {data.email}</div>
@@ -178,26 +203,24 @@ export default function CardCreator({ isLoggedIn }) {
         <h2 className="text-2xl font-black mb-2 text-slate-900 flex items-center gap-2">
             <FiSettings className="text-brand-primary" /> Card Architect
         </h2>
-        <p className="text-slate-400 text-xs mb-8 font-medium uppercase tracking-widest italic">Design with Precision</p>
+        <p className="text-slate-400 text-xs mb-8 font-medium uppercase tracking-widest italic">Professional Identity Hub</p>
         
         <div className="flex bg-slate-100 p-1 rounded-2xl mb-8">
             <button onClick={() => setActiveSide('front')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeSide === 'front' ? 'bg-white shadow-sm text-brand-primary' : 'text-slate-400'}`}>Front View</button>
             <button onClick={() => setActiveSide('back')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeSide === 'back' ? 'bg-white shadow-sm text-brand-primary' : 'text-slate-400'}`}>Back View</button>
         </div>
 
+        {/* LOGO VS QR TOGGLE */}
         <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center justify-between">
-           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Swap Front QR for Logo?</span>
-           <button 
-                onClick={() => setUseLogoOnFront(!useLogoOnFront)}
-                className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${useLogoOnFront ? 'bg-brand-primary' : 'bg-slate-300'}`}
-            >
+           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Enable Business Logo</span>
+           <button onClick={() => setUseLogoOnFront(!useLogoOnFront)} className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${useLogoOnFront ? 'bg-brand-primary' : 'bg-slate-300'}`}>
                 <div className={`w-4 h-4 bg-white rounded-full transition-all ${useLogoOnFront ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Profile Photo</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Profile</p>
                 <label className="relative w-16 h-16 mx-auto rounded-full bg-white border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-brand-primary overflow-hidden">
                     {profileImage ? <img src={profileImage} className="w-full h-full object-cover" /> : <FiCamera className="text-slate-300 text-xl" />}
                     <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'profile')} accept="image/*" />
@@ -213,8 +236,8 @@ export default function CardCreator({ isLoggedIn }) {
         </div>
 
         {activeSide === 'back' && (
-            <div className="mb-8 p-4 bg-slate-900 rounded-2xl text-white">
-                <p className="text-[9px] font-bold text-brand-primary uppercase tracking-[0.3em] mb-4 text-center">Back QR Slots</p>
+            <div className="mb-8 p-4 bg-slate-900 rounded-2xl text-white shadow-xl">
+                <p className="text-[9px] font-bold text-brand-primary uppercase tracking-[0.3em] mb-4 text-center">Configure Back Connectors</p>
                 <div className="grid grid-cols-2 gap-4">
                     <select value={socialSlots.slot1} onChange={(e) => setSocialSlots({...socialSlots, slot1: e.target.value})} className="bg-slate-800 text-[10px] p-2 rounded-lg w-full border border-slate-700 outline-none">
                         {Object.keys(platforms).map(k => <option key={k} value={k}>{platforms[k].label}</option>)}
@@ -238,98 +261,81 @@ export default function CardCreator({ isLoggedIn }) {
                 {!useLogoOnFront && (
                     <div className="group">
                         <label className="text-[10px] font-bold text-brand-primary uppercase tracking-widest ml-1 mb-2 block">
-                            <FiLink className="inline mr-1" /> Front QR Destination
+                            <FiLink className="inline mr-1" /> Front QR Link
                         </label>
-                        <input 
-                            className="w-full p-4 bg-blue-50/30 rounded-2xl border border-blue-100 focus:bg-white focus:ring-4 ring-brand-primary/10 transition-all text-xs text-slate-900 font-bold outline-none" 
-                            value={data.frontQrLink} 
-                            onChange={(e) => setData({...data, frontQrLink: e.target.value})} 
-                        />
+                        <input className="w-full p-4 bg-blue-50/30 rounded-2xl border border-blue-100 focus:bg-white focus:ring-4 ring-brand-primary/10 transition-all text-xs text-slate-900 font-bold outline-none" value={data.frontQrLink} onChange={(e) => setData({...data, frontQrLink: e.target.value})} />
                     </div>
                 )}
               </>
             ) : (
               <>
-                <InputGroup label={`${platforms[socialSlots.slot1].label} Link`} value={data[socialSlots.slot1]} onChange={(val) => setData({...data, [socialSlots.slot1]: val})} />
-                <InputGroup label={`${platforms[socialSlots.slot2].label} Link`} value={data[socialSlots.slot2]} onChange={(val) => setData({...data, [socialSlots.slot2]: val})} />
+                <InputGroup label={`${platforms[socialSlots.slot1].label} URL`} value={data[socialSlots.slot1]} onChange={(val) => setData({...data, [socialSlots.slot1]: val})} />
+                <InputGroup label={`${platforms[socialSlots.slot2].label} URL`} value={data[socialSlots.slot2]} onChange={(val) => setData({...data, [socialSlots.slot2]: val})} />
               </>
             )}
         </div>
 
         <button 
           onClick={downloadCard}
-          className="w-full mt-2 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-brand-primary transition-all flex items-center justify-center gap-3"
+          disabled={isDownloading}
+          className="w-full mt-2 py-5 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-slate-900 transition-all flex items-center justify-center gap-3 shadow-2xl shadow-blue-200"
         >
-          {isDownloading ? <FiRefreshCw className="animate-spin" /> : <FiDownload />}
-          {isDownloading ? "Synthesizing Image..." : `Export ${activeSide} Canvas`}
+          {isDownloading ? <FiRefreshCw className="animate-spin" /> : <FiDownload className="text-lg" />}
+          {isDownloading ? "Generating HQ..." : "Unlock & Download (₹9)"}
         </button>
+        <div className="mt-4 flex items-center justify-center gap-2 text-slate-400">
+           <FiShield className="text-xs" /> <span className="text-[8px] font-bold uppercase tracking-widest">Secure UPI / Card Payment</span>
+        </div>
       </div>
 
+      {/* PREVIEW SIDE */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-200 order-1 lg:order-2 overflow-hidden">
-        <div className="flex items-center gap-2 text-slate-400 mb-6 uppercase tracking-[0.4em] text-[10px] font-bold">
-            <FiLayers className="animate-bounce" /> Live Preview Engine
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-6 mb-8 w-full max-w-2xl">
-            {/* COLOR DOCK */}
+        
+        <div className="flex flex-col md:flex-row gap-6 mb-8 w-full max-w-3xl">
+            {/* GRADIENT DOCK */}
             <div className="flex-1 p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Gradient Palette</p>
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Identity Palette</p>
                <div className="flex justify-center items-center gap-6">
                   <div className="flex flex-col items-center gap-1">
                       <input type="color" value={color1} onChange={(e) => setColor1(e.target.value)} className="w-10 h-10 rounded-full cursor-pointer border-4 border-slate-50 p-0" />
-                      <span className="text-[7px] font-bold text-slate-300 uppercase">Primary</span>
+                      <span className="text-[7px] font-bold text-slate-300 uppercase tracking-tighter">Prime</span>
                   </div>
                   <div className="flex flex-col items-center gap-1">
                       <input type="color" value={color2} onChange={(e) => setColor2(e.target.value)} className="w-10 h-10 rounded-full cursor-pointer border-4 border-slate-50 p-0" />
-                      <span className="text-[7px] font-bold text-slate-300 uppercase">Secondary</span>
+                      <span className="text-[7px] font-bold text-slate-300 uppercase tracking-tighter">Accent</span>
                   </div>
                </div>
             </div>
 
             {/* PATTERN DOCK */}
             <div className="flex-1 p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Texture Pattern</p>
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Surface Texture</p>
                <div className="grid grid-cols-4 gap-2">
                   {Object.keys(patterns).map(p => (
                       <button key={p} onClick={() => setSelectedPattern(p)} className={`group relative w-full aspect-square rounded-xl border-2 transition-all overflow-hidden ${selectedPattern === p ? 'border-brand-primary scale-110 shadow-lg' : 'border-slate-50'}`}>
                          <div className="absolute inset-0 bg-slate-900" style={{ backgroundImage: patterns[p], backgroundSize: p === 'dots' ? '8px' : '30px' }}></div>
-                         <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-[6px] font-bold text-white uppercase py-0.5">{p}</span>
                       </button>
                   ))}
                </div>
             </div>
 
-            {/* NEW: FONT SELECTOR DOCK */}
+            {/* TYPOGRAPHY DOCK */}
             <div className="flex-1 p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Typography</p>
-               <div className="grid grid-cols-1 gap-1">
-                  <select 
-                    value={selectedFont} 
-                    onChange={(e) => setSelectedFont(e.target.value)}
-                    className="w-full bg-slate-50 text-[10px] font-bold p-2 rounded-xl border border-slate-100 outline-none text-slate-700"
-                  >
-                    {Object.keys(fontFamilies).map(f => <option key={f} value={f}>{f} Style</option>)}
-                  </select>
-                  <div className="flex justify-center mt-1">
-                     <FiType className="text-slate-200 text-lg" />
-                  </div>
-               </div>
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Brand Typeface</p>
+               <select value={selectedFont} onChange={(e) => setSelectedFont(e.target.value)} className="w-full bg-slate-50 text-[10px] font-bold p-3 rounded-xl border border-slate-100 outline-none">
+                  {Object.keys(fontFamilies).map(f => <option key={f} value={f}>{f} Architecture</option>)}
+               </select>
             </div>
         </div>
         
         <div className="relative transform scale-[0.55] sm:scale-[0.8] md:scale-100 transition-all origin-center">
-            <motion.div 
-                key={activeSide + selectedPattern + selectedFont}
-                initial={{ rotateY: 90, opacity: 0 }}
-                animate={{ rotateY: 0, opacity: 1 }}
-                className="shadow-2xl rounded-[15px] overflow-hidden"
-            >
+            <motion.div key={activeSide + selectedPattern + selectedFont} initial={{ rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} className="shadow-2xl rounded-[15px] overflow-hidden">
                 <CardContent />
             </motion.div>
         </div>
 
         <button onClick={() => setActiveSide(activeSide === 'front' ? 'back' : 'front')} className="mt-12 flex items-center gap-3 px-10 py-4 bg-white rounded-full shadow-2xl text-[10px] font-bold uppercase tracking-widest hover:text-brand-primary transition-all group border border-slate-100">
-            <FiRefreshCw className="group-hover:rotate-180 transition-transform duration-700" /> Flip Identity
+            <FiRefreshCw className="group-hover:rotate-180 transition-transform duration-700" /> Rotate Card Perspective
         </button>
       </div>
     </div>
