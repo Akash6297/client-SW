@@ -3,12 +3,17 @@
 import React, { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 import QRCode from 'react-qr-code';
-import { motion } from 'framer-motion';
-import { FiCamera, FiRefreshCw, FiMail, FiPhone, FiDownload, FiSettings, FiBriefcase, FiLayers, FiLink, FiType, FiShield, FiZap, FiCopy } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+// FIXED: Added all missing icons here
+import { 
+  FiCamera, FiRefreshCw, FiMail, FiPhone, FiDownload, 
+  FiSettings, FiBriefcase, FiLayers, FiLink, FiType, 
+  FiShield, FiZap, FiCopy, FiInfo, FiX, FiPhoneCall, 
+  FiTrendingUp, FiCheckCircle 
+} from 'react-icons/fi';
 import { FaInstagram, FaFacebookF, FaLinkedinIn, FaGithub, FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
 
 export default function CardCreator({ isLoggedIn }) {
-  // TWO SEPARATE REFS FOR PERFECT SIMULTANEOUS DOWNLOAD
   const frontDownloadRef = useRef(null);
   const backDownloadRef = useRef(null);
   
@@ -17,9 +22,9 @@ export default function CardCreator({ isLoggedIn }) {
   const [businessLogo, setBusinessLogo] = useState(null);
   const [useLogoOnFront, setUseLogoOnFront] = useState(false); 
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showInfo, setShowInfo] = useState(false); // State for the Info Hub
   
-  // PRICING STATE
-  const [pricingTier, setPricingTier] = useState('single'); // 'single' (₹25) or 'dual' (₹40)
+  const [pricingTier, setPricingTier] = useState('single'); 
 
   const [color1, setColor1] = useState('#2563eb'); 
   const [color2, setColor2] = useState('#a855f7'); 
@@ -79,7 +84,6 @@ export default function CardCreator({ isLoggedIn }) {
     }
   };
 
-  // --- CORE DUAL-DOWNLOAD LOGIC ---
   const executeDownload = async (ref, fileName) => {
     const url = await toPng(ref.current, { cacheBust: true, pixelRatio: 3, skipFonts: true });
     const link = document.createElement('a');
@@ -90,8 +94,7 @@ export default function CardCreator({ isLoggedIn }) {
 
   const startPaymentFlow = async () => {
     if (!isLoggedIn) return alert("🔒 Please login to SmoothWeb!");
-
-    const finalAmount = pricingTier === 'single' ? 2500 : 4000; // in paise
+    const finalAmount = pricingTier === 'single' ? 2500 : 4000; 
 
     const options = {
       key: "rzp_live_SC0sXa0djHiAbC", 
@@ -103,10 +106,7 @@ export default function CardCreator({ isLoggedIn }) {
       handler: async function (response) {
         setIsDownloading(true);
         try {
-            // ALWAYS DOWNLOAD FRONT
             await executeDownload(frontDownloadRef, `SmoothWeb-${data.name}-Front.png`);
-            
-            // DOWNLOAD BACK IF DUAL PACKAGE BOUGHT
             if (pricingTier === 'dual') {
                 setTimeout(async () => {
                     await executeDownload(backDownloadRef, `SmoothWeb-${data.name}-Back.png`);
@@ -124,7 +124,6 @@ export default function CardCreator({ isLoggedIn }) {
     rzp.open();
   };
 
-  // COMPONENT FOR THE ACTUAL CARD DESIGN
   const CardDesign = ({ side, innerRef }) => (
     <div ref={innerRef}
         className="w-[500px] h-[300px] rounded-[15px] p-8 relative shadow-2xl overflow-hidden flex flex-col justify-between text-white"
@@ -143,7 +142,7 @@ export default function CardCreator({ isLoggedIn }) {
                             {profileImage && <img src={profileImage} className="w-full h-full object-cover" alt="P" />}
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black tracking-tight">{data.name}</h1>
+                            <h1 className="text-2xl font-black tracking-tight leading-none">{data.name}</h1>
                             <p className="text-[11px] font-bold opacity-75 uppercase tracking-[0.2em] mt-1">{data.role}</p>
                         </div>
                     </div>
@@ -188,7 +187,7 @@ export default function CardCreator({ isLoggedIn }) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row pt-20 lg:pt-0">
       
-      {/* SHADOW RENDERERS (HIDDEN) */}
+      {/* SHADOW RENDERERS */}
       <div className="absolute -left-[9999px] top-0 pointer-events-none">
           <CardDesign side="front" innerRef={frontDownloadRef} />
           <CardDesign side="back" innerRef={backDownloadRef} />
@@ -197,9 +196,8 @@ export default function CardCreator({ isLoggedIn }) {
       {/* EDITOR PANEL */}
       <div className="w-full lg:w-1/3 bg-white border-r border-slate-200 p-6 md:p-8 lg:h-screen lg:overflow-y-auto order-2 lg:order-1 custom-scrollbar">
         <h2 className="text-2xl font-black mb-2 text-slate-900">Card Architect</h2>
-        <p className="text-slate-400 text-xs mb-8 font-medium uppercase tracking-widest">Master Identity Control</p>
+        <p className="text-slate-400 text-xs mb-8 font-medium uppercase tracking-widest italic">Design with Precision</p>
         
-        {/* PACKAGE SELECTOR */}
         <div className="mb-10 p-5 bg-slate-900 rounded-[2rem] text-white shadow-xl border border-brand-primary/20">
             <p className="text-[10px] font-bold text-brand-primary uppercase tracking-[0.4em] mb-5 text-center">Choose Export Package</p>
             <div className="flex gap-4">
@@ -224,19 +222,18 @@ export default function CardCreator({ isLoggedIn }) {
             <button onClick={() => setActiveSide('back')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${activeSide === 'back' ? 'bg-white shadow-sm text-brand-primary' : 'text-slate-400'}`}>Preview Back</button>
         </div>
 
-        {/* IMAGE UPLOADS */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+        <div className="grid grid-cols-2 gap-4 mb-8 text-center">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Profile</p>
                 <label className="relative w-16 h-16 mx-auto rounded-full bg-white border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-brand-primary overflow-hidden">
-                    {profileImage ? <img src={profileImage} className="w-full h-full object-cover" /> : <FiCamera className="text-slate-300" />}
+                    {profileImage ? <img src={profileImage} className="w-full h-full object-cover" alt="preview" /> : <FiCamera className="text-slate-300" />}
                     <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'profile')} accept="image/*" />
                 </label>
             </div>
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Biz Logo</p>
                 <label className="relative w-16 h-16 mx-auto rounded-xl bg-white border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-brand-primary overflow-hidden">
-                    {businessLogo ? <img src={businessLogo} className="w-full h-full object-contain p-2" /> : <FiBriefcase className="text-slate-300" />}
+                    {businessLogo ? <img src={businessLogo} className="w-full h-full object-contain p-2" alt="logo" /> : <FiBriefcase className="text-slate-300" />}
                     <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'logo')} accept="image/*" />
                 </label>
             </div>
@@ -292,34 +289,29 @@ export default function CardCreator({ isLoggedIn }) {
       </div>
 
       {/* PREVIEW SIDE */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-200 order-1 lg:order-2 overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-200 order-1 lg:order-2 overflow-hidden relative">
         
-        <div className="flex flex-col md:flex-row gap-6 mb-8 w-full max-w-3xl">
-            {/* COLOR DOCK */}
-            <div className="flex-1 p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Palette</p>
-               <div className="flex gap-6">
-                  <input type="color" value={color1} onChange={(e) => setColor1(e.target.value)} className="w-10 h-10 rounded-full cursor-pointer border-4 border-slate-50 p-0" />
-                  <input type="color" value={color2} onChange={(e) => setColor2(e.target.value)} className="w-10 h-10 rounded-full cursor-pointer border-4 border-slate-50 p-0" />
+        <div className="flex flex-col md:flex-row gap-4 mb-8 w-full max-w-3xl">
+            <div className="flex-1 p-4 bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
+               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3">Palette</p>
+               <div className="flex gap-4">
+                  <input type="color" value={color1} onChange={(e) => setColor1(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border-none p-0" />
+                  <input type="color" value={color2} onChange={(e) => setColor2(e.target.value)} className="w-8 h-8 rounded-lg cursor-pointer border-none p-0" />
                </div>
             </div>
-
-            {/* PATTERN DOCK */}
-            <div className="flex-1 p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Surface</p>
+            <div className="flex-1 p-4 bg-white rounded-3xl shadow-sm border border-slate-100">
+               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Surface</p>
                <div className="grid grid-cols-4 gap-2">
                   {Object.keys(patterns).map(p => (
-                      <button key={p} onClick={() => setSelectedPattern(p)} className={`group relative w-full aspect-square rounded-xl border-2 overflow-hidden transition-all ${selectedPattern === p ? 'border-brand-primary scale-110' : 'border-slate-50'}`}>
-                         <div className="absolute inset-0 bg-slate-900" style={{ backgroundImage: patterns[p], backgroundSize: p === 'dots' ? '8px' : '30px' }}></div>
+                      <button key={p} onClick={() => setSelectedPattern(p)} className={`w-full aspect-square rounded-lg border-2 transition-all overflow-hidden ${selectedPattern === p ? 'border-brand-primary scale-110' : 'border-slate-50'}`}>
+                         <div className="w-full h-full bg-slate-900" style={{ backgroundImage: patterns[p], backgroundSize: '15px' }}></div>
                       </button>
                   ))}
                </div>
             </div>
-
-            {/* TYPOGRAPHY DOCK */}
-            <div className="flex-1 p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Typeface</p>
-               <select value={selectedFont} onChange={(e) => setSelectedFont(e.target.value)} className="w-full bg-slate-50 text-[10px] font-bold p-3 rounded-xl border border-slate-100 outline-none">
+            <div className="flex-1 p-4 bg-white rounded-3xl shadow-sm border border-slate-100">
+               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Typeface</p>
+               <select value={selectedFont} onChange={(e) => setSelectedFont(e.target.value)} className="w-full bg-slate-50 text-[10px] font-bold p-2.5 rounded-xl outline-none">
                   {Object.keys(fontFamilies).map(f => <option key={f} value={f}>{f}</option>)}
                </select>
             </div>
@@ -334,16 +326,73 @@ export default function CardCreator({ isLoggedIn }) {
         <button onClick={() => setActiveSide(activeSide === 'front' ? 'back' : 'front')} className="mt-12 flex items-center gap-3 px-12 py-5 bg-white rounded-full shadow-2xl text-[10px] font-bold uppercase tracking-widest hover:text-brand-primary transition-all group border border-slate-100">
             <FiRefreshCw className="group-hover:rotate-180 transition-transform duration-700 text-lg" /> Flip Perspective
         </button>
+
+        {/* --- FLOATING INFO HUB (RE-IMPLEMENTED FIXED) --- */}
+        <button 
+            onClick={() => setShowInfo(true)}
+            className="fixed bottom-10 right-10 z-[100] w-14 h-14 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-110 transition-all group"
+        >
+           <FiInfo size={24} className="group-hover:rotate-12 transition-transform" />
+        </button>
+
+        <AnimatePresence>
+          {showInfo && (
+            <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6"
+            >
+                <motion.div 
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="bg-white max-w-md w-full rounded-[2.5rem] shadow-2xl relative overflow-hidden"
+                >
+                    <button onClick={() => setShowInfo(false)} className="absolute top-6 right-6 p-2 bg-slate-50 rounded-full hover:bg-slate-200 transition-colors">
+                        <FiX size={20} className="text-slate-500" />
+                    </button>
+
+                    <div className="p-10 text-slate-900">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-brand-primary text-2xl"><FiTrendingUp /></div>
+                            <h3 className="text-2xl font-black tracking-tight leading-none">The Digital Edge</h3>
+                        </div>
+
+                        <div className="space-y-6 mb-10">
+                            <InfoItem title="For Small Business" desc="Build instant trust. A professional digital card shows your clients you are tech-forward and established." />
+                            <InfoItem title="For Professionals" desc="Network without limits. No more physical card waste. Share your portfolio and links with a single scan." />
+                            <InfoItem title="For Creators" desc="Convert followers instantly. Link directly to your latest content, YouTube, or Instagram handle." />
+                        </div>
+
+                        <div className="p-6 bg-slate-900 rounded-3xl text-white">
+                            <p className="text-[10px] font-bold text-brand-primary uppercase tracking-widest mb-2">Exclusive Custom Design</p>
+                            <p className="text-sm font-light text-slate-400 mb-4 leading-relaxed">Want a card that's unique to your brand? Contact our team directly.</p>
+                            <a href="tel:6297321207" className="flex items-center gap-3 text-lg font-bold hover:text-brand-primary transition-colors">
+                                <FiPhoneCall /> +91 6297321207
+                            </a>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
+// FIXED: Helper components placed outside the main export or as pure functions
 function InputGroup({ label, value, onChange }) {
     return (
-        <div className="group">
+        <div className="group text-slate-900">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-2 block">{label}</label>
-            <input className="w-full p-4 bg-slate-50 rounded-2xl border border-transparent focus:bg-white focus:ring-4 ring-brand-primary/10 transition-all text-xs text-slate-900 font-bold outline-none" value={value} onChange={(e) => onChange(e.target.value)} />
+            <input className="w-full p-4 bg-slate-50 rounded-2xl border border-transparent focus:bg-white focus:ring-4 ring-brand-primary/10 transition-all text-xs font-bold outline-none" value={value} onChange={(e) => onChange(e.target.value)} />
+        </div>
+    );
+}
+
+function InfoItem({ title, desc }) {
+    return (
+        <div className="space-y-1">
+            <h4 className="font-bold text-slate-900 flex items-center gap-2"><FiCheckCircle className="text-brand-primary" /> {title}</h4>
+            <p className="text-sm text-slate-500 leading-relaxed font-light">{desc}</p>
         </div>
     );
 }

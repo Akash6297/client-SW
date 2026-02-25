@@ -7,6 +7,7 @@ import ScrollUpButton from './components/ScrollUpButton';
 import SiteLoader from './components/SiteLoader';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ChatWidget from './components/ChatWidget'; 
 
 // Page Imports
 import Landing from './pages/Landing';
@@ -48,6 +49,9 @@ function App() {
         </main>
 
         <Footer />
+
+        {/* GLOBAL CHAT WIDGET */}
+        <ChatWidget /> 
 
         {/* 2. Floating button always available */}
         <ScrollUpButton />
