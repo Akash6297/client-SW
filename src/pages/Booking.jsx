@@ -1,20 +1,20 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  FiCalendar, FiClock, FiShield, FiCreditCard, FiZap, 
-  FiAlertCircle, FiCheckCircle, FiX, FiPhone, FiArrowRight, FiRefreshCw 
+  FiZap, FiCheckCircle, FiPhone, FiArrowRight, FiRefreshCw, FiCreditCard, FiAlertCircle, FiMail 
 } from 'react-icons/fi';
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwkHLp24O865MWegdTOOZO9hds_E-de2kQCRbJFi5pItFzRR2RWjkFXsWWNpWdrucwYQw/exec";
+// PASTE YOUR NEW DEPLOYED URL HERE
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4qfaB1bXSf7aql0JB0JTVqxzNxNaWAwTXFt6lYXgzMuK_zsLSm6GpMAoeGHtL-QTf/exec";
 
 export default function Booking() {
   const [selectedService, setSelectedService] = useState('Full Strategy Session');
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false); 
-  const [busySlots, setBusySlots] = useState([]);
-  const [finalBookingInfo, setFinalBookingInfo] = useState(null); // To store info for success modal
+  const [busyKeys, setBusyKeys] = useState([]); 
+  const [finalBookingInfo, setFinalBookingInfo] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', date: '', time: '' });
 
   const services = [
@@ -24,70 +24,60 @@ export default function Booking() {
     { title: "Custom Card Build", price: "49", desc: "NFC & Brand Identity sync" }
   ];
 
-  const fetchBusySlots = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
-      const res = await fetch(SCRIPT_URL);
+      // Force cache-busting by adding a timestamp
+      const res = await fetch(`${SCRIPT_URL}?t=${Date.now()}`);
       const data = await res.json();
-      setBusySlots(data);
+      setBusyKeys(data);
     } catch (err) {
-      console.error("Error fetching slots:", err);
+      console.error("Fetch error:", err);
     }
-  };
-
-  useEffect(() => {
-    fetchBusySlots();
   }, []);
 
-  const getTimeSlots = () => {
+  useEffect(() => {
+    fetchBookings();
+  }, [formData.date, fetchBookings]); // Refresh keys whenever date changes
+
+  const getAvailableTimeGrid = () => {
     if (!formData.date) return [];
     const day = new Date(formData.date).getDay();
     const isWeekend = (day === 6 || day === 0);
-    let times = isWeekend 
+    
+    const masterSchedule = isWeekend 
       ? ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"]
       : ["08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM", "10:00 PM"];
-    
-    return times.filter(t => !busySlots.some(busy => busy.date === formData.date && busy.time === t));
-  };
 
-  const loadRazorpay = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      document.body.appendChild(script);
+    return masterSchedule.map(time => {
+      // Strict matching: date|TIME (trimmed and uppercased)
+      const currentKey = `${formData.date}|${time.trim().toUpperCase()}`;
+      const isBooked = busyKeys.includes(currentKey);
+      return { time, isBooked };
     });
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
-    if(!formData.time) return alert("Please select an available time slot");
+    if(!formData.time) return alert("Please select a slot");
 
     setLoading(true);
 
-    // 1. RE-VERIFY AVAILABILITY IMMEDIATELY
-    const verifyRes = await fetch(SCRIPT_URL);
-    const latestSlots = await verifyRes.json();
-    const isStillAvailable = !latestSlots.some(busy => busy.date === formData.date && busy.time === formData.time);
-
-    if(!isStillAvailable) {
-        alert("Sorry! This slot was just booked by someone else. Please choose another time.");
-        setBusySlots(latestSlots);
+    // Final real-time check before payment
+    const verifyRes = await fetch(`${SCRIPT_URL}?t=${Date.now()}`);
+    const latestKeys = await verifyRes.json();
+    if(latestKeys.includes(`${formData.date}|${formData.time.toUpperCase()}`)) {
+        alert("This slot was just taken. Please select another time.");
+        setBusyKeys(latestKeys);
         setLoading(false);
         return;
     }
 
-    const res = await loadRazorpay();
-    if (!res) {
-        setLoading(false);
-        return alert("Razorpay failed to load.");
-    }
-
     const options = {
       key: "rzp_live_SC0sXa0djHiAbC", 
-      amount: 100, // ₹49
+      amount: 4900, 
       currency: "INR",
       name: "SmoothWeb",
-      description: `Consultation: ${selectedService}`,
+      description: `Strategy: ${selectedService}`,
       image: "/favicon.png",
       handler: async function (response) {
         setLoading(true);
@@ -98,27 +88,16 @@ export default function Booking() {
         };
         
         try {
-            // Use no-cors but ensure JSON string is clean
-            await fetch(SCRIPT_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify(meetingData) 
-            });
-            
-            // Set info for success modal then show it
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(meetingData) });
             setFinalBookingInfo(meetingData);
             setLoading(false);
             setShowSuccess(true);
         } catch (error) {
             setLoading(false);
-            alert("Error saving booking. Please contact support with Payment ID: " + response.razorpay_payment_id);
+            alert("Payment successful but storage failed. Contact Akash: 6297321207");
         }
       },
-      prefill: { 
-        name: formData.name, 
-        email: formData.email,
-        contact: formData.phone 
-      },
+      prefill: { name: formData.name, email: formData.email, contact: formData.phone },
       theme: { color: "#2563eb" },
       modal: { ondismiss: () => setLoading(false) }
     };
@@ -131,19 +110,17 @@ export default function Booking() {
     <div className="bg-white min-h-screen pt-32 pb-20 px-6 relative">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <motion.span initial={{y:10, opacity:0}} animate={{y:0, opacity:1}} className="text-brand-primary font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block">Secure Scheduling</motion.span>
-          <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter mb-6 leading-none">Book Your Growth<span className="text-brand-primary">.</span></h1>
+          <motion.span initial={{opacity:0}} animate={{opacity:1}} className="text-brand-primary font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block underline">Verified Bookings Only</motion.span>
+          <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter mb-6 leading-none">Secure Growth<span className="text-brand-primary">.</span></h1>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-7 space-y-8">
              <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100 flex flex-col md:flex-row items-center gap-8 shadow-sm">
-                <div className="w-20 h-20 rounded-3xl bg-brand-primary text-white flex items-center justify-center text-3xl shadow-xl shrink-0"><FiZap /></div>
+                <div className="w-16 h-16 rounded-2xl bg-brand-primary text-white flex items-center justify-center text-2xl shadow-lg shrink-0"><FiZap /></div>
                 <div>
-                    <h4 className="font-black text-slate-900 text-xl tracking-tight uppercase">Anti-Conflict System</h4>
-                    <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-                        Our system verifies slot availability in real-time. Once paid, your slot is instantly removed from the calendar to prevent double-bookings.
-                    </p>
+                    <h4 className="font-black text-slate-900 text-lg uppercase">Professional Automation</h4>
+                    <p className="text-slate-600 text-sm mt-1">Once booked, you will receive an automated email with your Google Meet link instantly.</p>
                 </div>
              </div>
 
@@ -157,16 +134,17 @@ export default function Booking() {
              </div>
           </div>
 
-          <div className="lg:col-span-5 bg-slate-900 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl relative border border-white/5">
+          <div className="lg:col-span-5 bg-slate-900 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl relative border border-white/5 overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-3xl rounded-full"></div>
              <form onSubmit={handlePayment} className="space-y-5 relative z-10">
-                <InputGroup label="Full Name" type="text" placeholder="Enter Name" onChange={v => setFormData({...formData, name: v})} />
-                <InputGroup label="Email" type="email" placeholder="email@example.com" onChange={v => setFormData({...formData, email: v})} />
+                <InputGroup label="Full Name" type="text" placeholder="Your Name" onChange={v => setFormData({...formData, name: v})} />
+                <InputGroup label="Email Address" type="email" placeholder="you@example.com" onChange={v => setFormData({...formData, email: v})} />
                 
                 <div className="space-y-2">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Phone Number</label>
                     <div className="relative text-slate-900">
                         <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input required type="tel" placeholder="+91" onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl focus:bg-white/10 outline-none text-white transition-all text-sm" />
+                        <input required type="tel" placeholder="+91" onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl focus:bg-white/10 outline-none text-white transition-all text-sm font-bold" />
                     </div>
                 </div>
 
@@ -178,13 +156,22 @@ export default function Booking() {
                 <AnimatePresence>
                   {formData.date && (
                     <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="space-y-2">
-                        <label className="text-[10px] font-bold text-brand-primary uppercase tracking-widest ml-1">Available Slots</label>
+                        <label className="text-[10px] font-bold text-brand-primary uppercase tracking-widest ml-1">Available Times</label>
                         <div className="grid grid-cols-2 gap-2">
-                            {getTimeSlots().length > 0 ? getTimeSlots().map(slot => (
-                                <button type="button" key={slot} onClick={() => setFormData({...formData, time: slot})} className={`py-3 rounded-xl text-[10px] font-bold border transition-all ${formData.time === slot ? 'bg-brand-primary border-brand-primary shadow-lg' : 'bg-white/5 border-white/10 hover:border-white/30'}`}>
-                                    {slot}
+                            {getAvailableTimeGrid().map((slot, i) => (
+                                <button 
+                                    type="button" 
+                                    disabled={slot.isBooked}
+                                    key={i} 
+                                    onClick={() => setFormData({...formData, time: slot.time})} 
+                                    className={`py-3 rounded-xl text-[10px] font-bold border transition-all relative overflow-hidden
+                                        ${slot.isBooked ? 'bg-slate-800 border-transparent text-slate-600 cursor-not-allowed' : 
+                                          formData.time === slot.time ? 'bg-brand-primary border-brand-primary shadow-lg' : 'bg-white/5 border-white/10 hover:border-white/30'}`}
+                                >
+                                    {slot.time}
+                                    {slot.isBooked && <span className="absolute inset-0 flex items-center justify-center bg-black/60 text-[8px] font-black tracking-widest">LOCKED</span>}
                                 </button>
-                            )) : <p className="col-span-2 text-[10px] text-rose-400 font-bold bg-rose-400/10 p-3 rounded-xl">Fully Booked</p>}
+                            ))}
                         </div>
                     </motion.div>
                   )}
@@ -192,33 +179,27 @@ export default function Booking() {
 
                 <button disabled={loading || !formData.time} className="w-full py-5 mt-4 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl hover:brightness-110 transition-all flex items-center justify-center gap-3 disabled:opacity-30">
                     {loading ? <FiRefreshCw className="animate-spin" /> : <FiCreditCard />}
-                    {loading ? "Confirming Slot..." : "Pay ₹49 & Secure Slot"}
+                    {loading ? "Verifying..." : "Book Session"}
                 </button>
              </form>
           </div>
         </div>
       </div>
 
-      {/* --- PROFESSIONAL SUCCESS MODAL --- */}
       <AnimatePresence>
         {showSuccess && finalBookingInfo && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-white flex items-center justify-center p-6 text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[2000] bg-white flex flex-col items-center justify-center p-6 text-center">
                 <div className="max-w-xl w-full">
-                    <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 100 }} className="w-24 h-24 bg-green-50 rounded-[2rem] flex items-center justify-center mx-auto mb-10">
+                    <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="w-24 h-24 bg-green-50 rounded-[2rem] flex items-center justify-center mx-auto mb-10 shadow-inner">
                         <FiCheckCircle className="text-5xl text-green-500" />
                     </motion.div>
-                    <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Session Secured!</h2>
-                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 mb-10 text-left">
-                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-4">Confirmed Appointment Details</p>
-                        <p className="text-slate-700 mb-2"><strong>Client:</strong> {finalBookingInfo.name}</p>
-                        <p className="text-slate-700 mb-2"><strong>Appointment:</strong> {finalBookingInfo.time} on {finalBookingInfo.date}</p>
-                        <p className="text-slate-700 mb-2"><strong>Service:</strong> {selectedService}</p>
-                        <div className="mt-4 pt-4 border-t border-slate-200">
-                          <p className="text-[10px] text-slate-400 uppercase font-bold">Payment ID:</p>
-                          <p className="text-brand-primary font-mono text-xs break-all">{finalBookingInfo.payId}</p>
-                        </div>
+                    <h2 className="text-5xl font-black text-slate-900 mb-2 tracking-tighter uppercase leading-none">Session Secured!</h2>
+                    <p className="text-slate-500 font-medium mb-10">Check your email for the Google Meet link.</p>
+                    <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-100 mb-10 text-left">
+                        <p className="text-slate-700 text-lg mb-2 capitalize"><strong>Client:</strong> {finalBookingInfo.name}</p>
+                        <p className="text-slate-700 text-lg mb-2"><strong>Schedule:</strong> {finalBookingInfo.time} | {finalBookingInfo.date}</p>
                     </div>
-                    <button onClick={() => window.location.href = "/"} className="w-full sm:w-auto px-12 py-5 bg-brand-dark text-white rounded-full font-bold text-lg hover:bg-brand-primary transition-all shadow-2xl">Return to SmoothWeb</button>
+                    <button onClick={() => window.location.reload()} className="px-12 py-5 bg-brand-dark text-white rounded-full font-bold text-lg hover:bg-brand-primary transition-all">Finish</button>
                 </div>
             </motion.div>
         )}
@@ -231,7 +212,7 @@ function InputGroup({ label, type, placeholder, onChange }) {
     return (
         <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
-            <input required type={type} placeholder={placeholder} onChange={e => onChange(e.target.value)} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:bg-white/10 outline-none transition-all text-sm text-white placeholder:text-slate-600" />
+            <input required type={type} placeholder={placeholder} onChange={e => onChange(e.target.value)} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl focus:bg-white/10 outline-none transition-all text-sm text-white font-medium" />
         </div>
     );
 }

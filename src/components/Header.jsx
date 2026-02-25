@@ -10,6 +10,8 @@ export default function Header() {
     { name: 'Mission', path: '/about' },
     { name: 'Solutions', path: '/services' },
     { name: 'Consulting', path: '/contact' },
+    { name: 'Portfolio', path: '/portfolio' },
+    { name: 'Book', path: '/book' },
   ];
 
   return (
@@ -71,7 +73,7 @@ export default function Header() {
                 </Link>
               ))}
               <Link to="/create" onClick={() => setIsOpen(false)} className="mt-4 text-brand-primary font-bold border-b-2 border-brand-primary text-xl">
-                Start My Project
+                Get Identity
               </Link>
             </div>
           </motion.div>
