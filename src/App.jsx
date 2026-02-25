@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom'; // Remove BrowserRouter from here
 
-// Import the new components
+// Import components
 import ScrollToTop from './components/ScrollToTop';
 import ScrollUpButton from './components/ScrollUpButton';
 import SiteLoader from './components/SiteLoader';
@@ -19,6 +19,24 @@ import Booking from './pages/Booking';
 import CardCreator from './components/CardCreator';
 
 function App() {
+  const location = useLocation();
+
+  // 1. Dynamic SEO Titles
+  useEffect(() => {
+    const routeTitles = {
+      "/": "SmoothWeb | Premium Portfolios & Digital Identity",
+      "/about": "About SmoothWeb | Mission & Purpose",
+      "/services": "Our Solutions | Portfolio & Ad Strategy",
+      "/portfolio": "Selected Works | SmoothWeb Portfolio",
+      "/contact": "Connect | SmoothWeb Digital Agency",
+      "/create": "Card Architect | Design Your Identity",
+      "/book": "Secure Consultation | Book Your Session"
+    };
+
+    document.title = routeTitles[location.pathname] || "SmoothWeb | Digital Excellence";
+  }, [location]);
+
+  // 2. Security & UI Logic
   useEffect(() => {
     // Restrict Right-Click
     const handleContextMenu = (e) => e.preventDefault();
@@ -27,13 +45,11 @@ function App() {
   }, []);
 
   return (
-    <Router>
+    <>
       <SiteLoader />
-      
-      {/* 1. Reset scroll on every navigation */}
       <ScrollToTop /> 
 
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen relative">
         <Header />
         
         <main className="flex-grow pt-20">
@@ -50,13 +66,11 @@ function App() {
 
         <Footer />
 
-        {/* GLOBAL CHAT WIDGET */}
+        {/* Floating Global Components */}
         <ChatWidget /> 
-
-        {/* 2. Floating button always available */}
         <ScrollUpButton />
       </div>
-    </Router>
+    </>
   );
 }
 
