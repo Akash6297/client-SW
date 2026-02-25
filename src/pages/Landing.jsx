@@ -91,6 +91,18 @@ export default function Landing() {
           </Link>
         </motion.div>
       </section>
+
+      {/* It provides words for the crawler without affecting your beautiful design */}
+      <section className="sr-only">
+        <h2>Professional Digital Solutions by Akash Mandal</h2>
+        <p>
+          SmoothWeb is a premium digital agency specializing in high-performance React portfolios, 
+          Meta and Google advertising strategies, and modern digital business cards. 
+          Our mission is to provide small business owners, professionals, and content creators 
+          with the technical tools needed for digital growth. Whether you need a custom website 
+          or a digital identity system, SmoothWeb delivers top-notch quality and responsive design.
+        </p>
+      </section>
     </div>
   );
 }
