@@ -378,21 +378,33 @@ export default function CardCreator({ isLoggedIn }) {
   );
 }
 
-// FIXED: Helper components placed outside the main export or as pure functions
+// FIXED: InputGroup with better mobile padding and focus states
 function InputGroup({ label, value, onChange }) {
     return (
-        <div className="group text-slate-900">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-2 block">{label}</label>
-            <input className="w-full p-4 bg-slate-50 rounded-2xl border border-transparent focus:bg-white focus:ring-4 ring-brand-primary/10 transition-all text-xs font-bold outline-none" value={value} onChange={(e) => onChange(e.target.value)} />
+        <div className="group text-slate-900 w-full">
+            <label className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 mb-1.5 sm:mb-2 block">
+                {label}
+            </label>
+            <input 
+                className="w-full p-3.5 sm:p-4 bg-slate-50 rounded-xl sm:rounded-2xl border border-transparent focus:bg-white focus:ring-4 ring-brand-primary/10 transition-all text-xs sm:text-sm font-bold outline-none" 
+                value={value} 
+                onChange={(e) => onChange(e.target.value)} 
+            />
         </div>
     );
 }
 
+// FIXED: InfoItem with better spacing for mobile descriptions
 function InfoItem({ title, desc }) {
     return (
-        <div className="space-y-1">
-            <h4 className="font-bold text-slate-900 flex items-center gap-2"><FiCheckCircle className="text-brand-primary" /> {title}</h4>
-            <p className="text-sm text-slate-500 leading-relaxed font-light">{desc}</p>
+        <div className="space-y-1.5 sm:space-y-1">
+            <h4 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                <FiCheckCircle className="text-brand-primary shrink-0" /> 
+                {title}
+            </h4>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-light pl-6 sm:pl-7">
+                {desc}
+            </p>
         </div>
     );
 }
