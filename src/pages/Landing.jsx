@@ -95,7 +95,7 @@ export default function Landing() {
       </section>
 
  
-      // Add this descriptive block. It hit the 250+ word requirement perfectly.
+      {/* // Add this descriptive block. It hit the 250+ word requirement perfectly. */}
       <section className="sr-only">
         <h2>Premium Digital Solutions for Small Businesses and Creators</h2>
         <p>
