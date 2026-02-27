@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
-import profileImg from '../assets/Akash.png'; 
+import profileImg from '../assets/Akash.jpeg'; 
 
 // Clean Social Icon Component
 const SocialIcon = ({ href, path }) => (
