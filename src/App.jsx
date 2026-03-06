@@ -9,14 +9,14 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ChatWidget from './components/ChatWidget'; 
 
-// Page Imports
-import Landing from './pages/Landing';
-import About from './pages/About';
-import Services from './pages/Services';
-import Portfolio from './pages/Portfolio';
-import Contact from './pages/Contact';
-import Booking from './pages/Booking';
-import CardCreator from './components/CardCreator';
+// Page Imports (Lazy Loaded for Performance)
+const Landing = React.lazy(() => import('./pages/Landing'));
+const About = React.lazy(() => import('./pages/About'));
+const Services = React.lazy(() => import('./pages/Services'));
+const Portfolio = React.lazy(() => import('./pages/Portfolio'));
+const Contact = React.lazy(() => import('./pages/Contact'));
+const Booking = React.lazy(() => import('./pages/Booking'));
+const CardCreator = React.lazy(() => import('./components/CardCreator'));
 
 function App() {
   const location = useLocation();
@@ -53,15 +53,17 @@ function App() {
         <Header />
         
         <main className="flex-grow pt-20">
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/book" element={<Booking />} />
-            <Route path="/create" element={<CardCreator isLoggedIn={true} />} />
-          </Routes>
+          <React.Suspense fallback={<SiteLoader />}>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/book" element={<Booking />} />
+              <Route path="/create" element={<CardCreator isLoggedIn={true} />} />
+            </Routes>
+          </React.Suspense>
         </main>
 
         <Footer />

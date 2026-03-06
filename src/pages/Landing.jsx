@@ -8,8 +8,8 @@ export default function Landing() {
   return (
     <div className="bg-white overflow-x-hidden">
       <SEOHead 
-        title="SmoothWeb | Premium Portfolios & Digital Identity"
-        description="We build premium portfolios, strategic ad growth funnels, and digital business cards. Start your journey today."
+        title="SmoothWeb | Custom Portfolios, Ad Funnels & Digital Identity"
+        description="SmoothWeb is a premium web design agency specializing in custom portfolio websites, strategic ad growth funnels, and NFC digital business cards."
         url="https://smoothweb.in/"
       />
       {/* --- HERO SECTION --- */}
