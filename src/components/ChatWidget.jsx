@@ -8,42 +8,83 @@ import {
   FiPhone, FiChevronRight, FiShield, FiStar, FiZap, FiTarget, FiSmartphone, FiClock, FiHelpCircle, FiArrowLeft
 } from 'react-icons/fi';
 
-// BROADER KNOWLEDGE ENGINE (More Keywords = More "AI" feel)
 const KNOWLEDGE_BASE = [
   { 
     id: "services", 
     label: "Our Services", 
-    keywords: ["service", "offer", "do", "provide", "work", "portfolio", "ads", "card"],
+    keywords: ["service", "offer", "do", "provide", "work", "portfolio", "ads", "card", "what do you do"],
     icon: <FiZap />,
     response: "We specialize in 3 areas: \n• High-end React Portfolios \n• Strategic Meta/Google Ad Funnels \n• Premium Digital Identity Cards (NFC Compatible)."
   },
   { 
     id: "pricing", 
     label: "Pricing & Plans", 
-    keywords: ["price", "cost", "how much", "rate", "₹", "charge", "pay", "buy", "standard", "premium"],
+    keywords: ["price", "cost", "how much", "rate", "₹", "charge", "pay", "buy", "standard", "premium", "cheap", "expensive"],
     icon: <FiStar />,
     response: "Digital Cards: ₹25 (Standard) / ₹40 (Premium). \nConsultation: ₹10 commitment fee. \nCustom Web Projects: Pricing varies based on complexity. Contact us for a quote!"
   },
   { 
     id: "usage", 
     label: "How to use?", 
-    keywords: ["use", "share", "how", "nfc", "qr", "work", "scanner", "iphone", "android"],
+    keywords: ["use", "share", "how to", "nfc", "qr", "work", "scanner", "iphone", "android", "scan"],
     icon: <FiSmartphone />,
     response: "Simply scan the QR code on your card to instantly open your links. Our digital cards are also optimized for NFC-enabled devices and work on both iOS and Android."
   },
   { 
     id: "timeline", 
     label: "Delivery Time", 
-    keywords: ["time", "fast", "delivery", "when", "days", "long", "ready"],
+    keywords: ["time", "fast", "delivery", "when", "days", "long", "ready", "duration", "how long"],
     icon: <FiClock />,
     response: "Digital Cards are ready instantly! \nCustom Portfolios typically take 7-10 business days. \nAd Campaigns are launched within 48 hours of strategy approval."
   },
   { 
     id: "trust", 
     label: "Security & Refund", 
-    keywords: ["trust", "safe", "secure", "legit", "fake", "razorpay", "refund", "money back", "cancel"],
+    keywords: ["trust", "safe", "secure", "legit", "fake", "razorpay", "refund", "money back", "cancel", "scam"],
     icon: <FiShield />,
     response: "SmoothWeb is 100% secure. We use Razorpay for all transactions. If your digital card fails to download after payment, contact us for an instant refund or manual delivery."
+  },
+  {
+    id: "contact",
+    label: "Contact Info",
+    keywords: ["contact", "phone", "email", "whatsapp", "call", "reach", "number", "talk", "speak"],
+    icon: <FiPhone />,
+    response: "You can reach Akash directly at:\n• WhatsApp/Phone: +91 6297321207\n• Email: akashmandal6297@gmail.com\nOr book a consultation from our Book page!"
+  },
+  {
+    id: "location",
+    label: "Location",
+    keywords: ["location", "where", "office", "based", "country", "city", "address", "from"],
+    icon: <FiTarget />,
+    response: "SmoothWeb is a digital-first agency based in India, but we work with clients globally! All consultations and delivery are handled 100% online."
+  },
+  {
+    id: "tech",
+    label: "Tech Stack",
+    keywords: ["tech", "stack", "react", "language", "code", "built with", "technology", "framework"],
+    icon: <FiZap />,
+    response: "We build premium experiences using modern tech: React.js, Tailwind CSS, Framer Motion for animations, and Vite for blazing-fast performance."
+  },
+  {
+    id: "ecommerce",
+    label: "E-Commerce",
+    keywords: ["ecommerce", "e-commerce", "store", "shop", "sell", "products", "shopify"],
+    icon: <FiStar />,
+    response: "Yes! While we specialize in portfolios, we also build high-converting e-commerce frontend experiences. Contact us with your specific requirements."
+  },
+  {
+    id: "seo",
+    label: "SEO Services",
+    keywords: ["seo", "rank", "google", "search", "engine", "optimize", "traffic"],
+    icon: <FiTarget />,
+    response: "All our custom sites come with built-in technical SEO (meta tags, fast loading speeds, clean architecture). For advanced ongoing SEO campaigns, we can formulate a specific strategy for you."
+  },
+  {
+    id: "maintenance",
+    label: "Maintenance",
+    keywords: ["maintain", "support", "help", "update", "changes", "fix", "bug", "monthly"],
+    icon: <FiShield />,
+    response: "We offer ongoing maintenance packages for our custom web projects! This covers minor updates, security patches, and uptime monitoring. Ask us for a quote."
   }
 ];
 

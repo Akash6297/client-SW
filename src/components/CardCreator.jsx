@@ -21,6 +21,7 @@ export default function CardCreator({ isLoggedIn }) {
   const [activeSide, setActiveSide] = useState('front'); 
   const [profileImage, setProfileImage] = useState(null);
   const [businessLogo, setBusinessLogo] = useState(null);
+  const [customBackground, setCustomBackground] = useState(null); // Added state for custom background
   const [useLogoOnFront, setUseLogoOnFront] = useState(false); 
   const [isDownloading, setIsDownloading] = useState(false);
   const [showInfo, setShowInfo] = useState(false); // State for the Info Hub
@@ -79,7 +80,8 @@ export default function CardCreator({ isLoggedIn }) {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (type === 'profile') setProfileImage(reader.result);
-        else setBusinessLogo(reader.result);
+        else if (type === 'logo') setBusinessLogo(reader.result);
+        else if (type === 'background') setCustomBackground(reader.result); // Handle custom background
       };
       reader.readAsDataURL(file);
     }
@@ -127,13 +129,28 @@ export default function CardCreator({ isLoggedIn }) {
 
   const CardDesign = ({ side, innerRef }) => (
     <div ref={innerRef}
-        className="w-[500px] h-[300px] rounded-[15px] p-8 relative shadow-2xl overflow-hidden flex flex-col justify-between text-white"
+        className="w-[500px] h-[300px] rounded-[15px] p-8 relative shadow-2xl flex flex-col justify-between text-white"
         style={{ 
-            background: `linear-gradient(to right, ${color1}, ${color2})`,
             fontFamily: fontFamilies[selectedFont]
         }}
     >
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: patterns[selectedPattern], backgroundSize: selectedPattern === 'dots' ? '20px' : '100px' }}></div>
+        {/* Layer 1: The custom background image OR the gradient color */}
+        <div 
+          className="absolute inset-0 rounded-[15px] overflow-hidden -z-20"
+          style={{
+            background: customBackground ? `url(${customBackground}) center/cover no-repeat` : `linear-gradient(to right, ${color1}, ${color2})`
+          }}
+        />
+
+        {/* Layer 2: The pattern overlay (only visible if no custom background, or barely visible over it) */}
+        {!customBackground && (
+          <div className="absolute inset-0 opacity-10 pointer-events-none rounded-[15px] -z-10" style={{ backgroundImage: patterns[selectedPattern], backgroundSize: selectedPattern === 'dots' ? '20px' : '100px' }}></div>
+        )}
+        
+        {/* Layer 3: A slight dark gradient overlay so text is readable over bright custom backgrounds */}
+        {customBackground && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-[15px] -z-10 pointer-events-none"></div>
+        )}
 
         {side === 'front' ? (
             <div className="relative z-10 flex flex-col h-full justify-between">
@@ -228,7 +245,7 @@ export default function CardCreator({ isLoggedIn }) {
             <button onClick={() => setActiveSide('back')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${activeSide === 'back' ? 'bg-white shadow-sm text-brand-primary' : 'text-slate-400'}`}>Preview Back</button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-8 text-center">
+        <div className="grid grid-cols-2 gap-4 mb-4 text-center">
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Profile</p>
                 <label className="relative w-16 h-16 mx-auto rounded-full bg-white border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-brand-primary overflow-hidden">
@@ -243,6 +260,30 @@ export default function CardCreator({ isLoggedIn }) {
                     <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'logo')} accept="image/*" />
                 </label>
             </div>
+        </div>
+
+        {/* CUSTOM BACKGROUND FIELD */}
+        <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+            <div className="flex items-center justify-between mb-3 px-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Custom Card Background</p>
+                {customBackground && (
+                    <button onClick={() => setCustomBackground(null)} className="text-[8px] font-bold text-red-500 uppercase flex items-center gap-1 hover:text-red-700">
+                        <FiX /> Remove
+                    </button>
+                )}
+            </div>
+            <label className="relative w-full h-20 rounded-xl bg-white border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-brand-primary hover:bg-slate-50 transition-all overflow-hidden group">
+                {customBackground ? (
+                    <img src={customBackground} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="custom bg" />
+                ) : (
+                    <>
+                        <FiCamera className="text-slate-400 text-xl mb-1" />
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Upload Custom Design</span>
+                    </>
+                )}
+                <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'background')} accept="image/*" />
+            </label>
+            {!customBackground && <p className="text-[9px] text-slate-400 mt-2 font-medium">Overwrites Color Palette & Surface Pattern</p>}
         </div>
 
         <div className="mb-6 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center justify-between">
