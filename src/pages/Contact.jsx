@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaInstagram, FaLinkedinIn, FaFacebookF } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6'; // Latest X logo
+import SEOHead from '../components/SEOHead'; // Import SEOHead
 
 export default function Contact() {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -61,6 +62,11 @@ export default function Contact() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 overflow-x-hidden">
+      <SEOHead 
+        title="Connect | SmoothWeb Digital Agency"
+        description="Get in touch with the SmoothWeb team today to start building your luxury digital presence and securing strategic growth."
+        url="https://smoothweb.in/contact"
+      />
       <div className="max-w-7xl mx-auto px-6">
         
         {/* --- HERO HEADER --- */}

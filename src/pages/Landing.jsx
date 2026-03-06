@@ -2,10 +2,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import SEOHead from '../components/SEOHead'; // Import SEOHead
 
 export default function Landing() {
   return (
     <div className="bg-white overflow-x-hidden">
+      <SEOHead 
+        title="SmoothWeb | Premium Portfolios & Digital Identity"
+        description="We build premium portfolios, strategic ad growth funnels, and digital business cards. Start your journey today."
+        url="https://smoothweb.in/"
+      />
       {/* --- HERO SECTION --- */}
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center justify-center px-4 md:px-6 overflow-hidden pt-24 md:pt-20">
         <div className="max-w-6xl mx-auto text-center z-10">

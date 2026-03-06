@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiGlobe, FiTrendingUp, FiLayers, FiZap, FiCheckCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb, HiOutlineDeviceMobile, HiOutlineChartBar } from 'react-icons/hi';
+import SEOHead from '../components/SEOHead'; // Import SEOHead
 
 export default function Services() {
   const allServices = [
@@ -34,6 +35,11 @@ export default function Services() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 px-6">
+      <SEOHead 
+        title="Our Solutions | Portfolio & Ad Strategy"
+        description="Premium digital ecosystem providing Custom Portfolio Websites, Ad Growth Strategies, and Digital Identity Systems."
+        url="https://smoothweb.in/services"
+      />
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER */}

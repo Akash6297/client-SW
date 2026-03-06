@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import profileImg from '../assets/Akash.jpeg'; 
+import SEOHead from '../components/SEOHead'; // Import SEOHead
 
 // Clean Social Icon Component
 const SocialIcon = ({ href, path }) => (
@@ -20,6 +21,11 @@ const SocialIcon = ({ href, path }) => (
 export default function About() {
   return (
     <div className="bg-white min-h-screen pt-20 overflow-x-hidden">
+      <SEOHead 
+        title="About SmoothWeb | Mission & Purpose"
+        description="Learn about the SmoothWeb ecosystem and our founder Akash Mandal's vision to democratize high-end technology for creators."
+        url="https://smoothweb.in/about"
+      />
       
       {/* --- SECTION 1: MISSION & PURPOSE --- */}
       <section className="max-w-7xl mx-auto px-6 py-12 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">

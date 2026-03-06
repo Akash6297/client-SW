@@ -12,6 +12,7 @@ import {
   FiTrendingUp, FiCheckCircle 
 } from 'react-icons/fi';
 import { FaInstagram, FaFacebookF, FaLinkedinIn, FaGithub, FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
+import SEOHead from './SEOHead'; // Import SEOHead
 
 export default function CardCreator({ isLoggedIn }) {
   const frontDownloadRef = useRef(null);
@@ -186,6 +187,11 @@ export default function CardCreator({ isLoggedIn }) {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row pt-20 lg:pt-0">
+      <SEOHead 
+        title="Card Architect | Design Your Identity"
+        description="Create and customize your premium digital business card. Fast, responsive, and reliable identity creation by SmoothWeb."
+        url="https://smoothweb.in/create"
+      />
       
       {/* SHADOW RENDERERS */}
       <div className="absolute -left-[9999px] top-0 pointer-events-none">

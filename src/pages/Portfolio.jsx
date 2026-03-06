@@ -5,6 +5,7 @@ import { FiExternalLink, FiStar, FiArrowRight, FiZap, FiShield, FiCode, FiSmartp
 import { Link } from 'react-router-dom';
 import sayandipImg from '../assets/sayandip.png';
 import udelineImg from '../assets/Udline.png';
+import SEOHead from '../components/SEOHead'; // Import SEOHead
 
 export default function Portfolio() {
   const projects = [
@@ -35,6 +36,11 @@ export default function Portfolio() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 overflow-x-hidden">
+      <SEOHead 
+        title="Selected Works | SmoothWeb Portfolio"
+        description="View our impact on the industry through high-retention cinematic portfolios and precision heavy-duty hubs."
+        url="https://smoothweb.in/portfolio"
+      />
       <div className="max-w-7xl mx-auto px-6">
         
         {/* --- HERO HEADER --- */}
