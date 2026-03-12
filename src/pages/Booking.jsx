@@ -110,14 +110,14 @@ export default function Booking() {
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 px-6 relative">
       <SEOHead
-        title="Secure Consultation | Book Your Session"
-        description="Book a strategy session with SmoothWeb to discuss custom portfolio builds, ad funnels, or premium digital cards."
+        title="Book Strategy Session | Digital Growth & UX Audit"
+        description="Secure your spot for a premium strategy session. We discuss portfolio architecture, ad growth funnels, and digital identity synchronization."
         url="https://smoothweb.in/book"
       />
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-brand-primary font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block underline">Verified Bookings Only</motion.span>
-          <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter mb-6 leading-none">Secure Growth<span className="text-brand-primary">.</span></h1>
+          <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter mb-6 leading-none">Strategize Growth<span className="text-brand-primary">.</span></h1>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-12 items-start">

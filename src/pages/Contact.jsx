@@ -63,8 +63,8 @@ export default function Contact() {
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 overflow-x-hidden">
       <SEOHead 
-        title="Connect | SmoothWeb Digital Agency"
-        description="Get in touch with the SmoothWeb team today to start building your luxury digital presence and securing strategic growth."
+        title="Contact SmoothWeb | Professional Portfolio & SEO Consultation"
+        description="Connect with India's top portfolio design agency. Book your session for SEO services, PPC growth, or custom digital identity solutions."
         url="https://smoothweb.in/contact"
       />
       <div className="max-w-7xl mx-auto px-6">
@@ -79,8 +79,8 @@ export default function Contact() {
             Start the Conversation
           </span>
           <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter mb-6">
-            Let’s Build Your <br />
-            <span className="text-brand-primary">Digital Future.</span>
+            Grow Your <br />
+            <span className="text-brand-primary">Digital Presence.</span>
           </h1>
           <p className="text-xl text-slate-500 max-w-2xl font-light">
             Whether you need a high-end portfolio, a strategic ad campaign, or a professional identity—we are ready to help you scale.

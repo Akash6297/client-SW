@@ -22,8 +22,8 @@ export default function About() {
   return (
     <div className="bg-white min-h-screen pt-20 overflow-x-hidden">
       <SEOHead 
-        title="About SmoothWeb | Mission & Purpose"
-        description="Learn about the SmoothWeb ecosystem and our founder Akash Mandal's vision to democratize high-end technology for creators."
+        title="About SmoothWeb | Leading Digital Visiting Card Platform India"
+        description="SmoothWeb is a professional portfolio website agency and digital visiting card platform founded by Akash Mandal. We democratize high-end tech for creators."
         url="https://smoothweb.in/about"
       />
       
@@ -41,8 +41,8 @@ export default function About() {
             </span>
           </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-tight mb-6 md:mb-8">
-            The Future of <br />
-            <span className="text-brand-primary">Digital Connection.</span>
+            The Leader in <br />
+            <span className="text-brand-primary">Digital Identity.</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-500 leading-relaxed mb-8 font-light max-w-xl">
             At SmoothWeb, we believe that professional growth shouldn't be limited by technical complexity. We are here to empower the next generation of creators.

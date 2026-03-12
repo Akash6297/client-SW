@@ -37,8 +37,8 @@ export default function Portfolio() {
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 overflow-x-hidden">
       <SEOHead 
-        title="Selected Works | SmoothWeb Portfolio"
-        description="View our impact on the industry through high-retention cinematic portfolios and precision heavy-duty hubs."
+        title="Portfolio Design Showreel | Web Developer & Photography Portfolios"
+        description="Explore our work in photography portfolio website design, web developer portfolios, and personal branding models. High-retention cinematic digital footprints."
         url="https://smoothweb.in/portfolio"
       />
       <div className="max-w-7xl mx-auto px-6">
@@ -48,8 +48,8 @@ export default function Portfolio() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <span className="text-brand-primary font-bold tracking-[0.4em] uppercase text-[10px] mb-4 block">Our Impact</span>
             <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter mb-8 leading-[0.9]">
-              Turning Ideas <br />
-              <span className="text-brand-primary">Into Reality.</span>
+              Portfolio Design <br />
+              <span className="text-brand-primary">Showreel.</span>
             </h1>
             <p className="text-xl text-slate-500 max-w-2xl font-light leading-relaxed">
               From cinematic portfolios for global creators to heavy-duty hubs for industrial giants. We craft the digital architecture of modern success.

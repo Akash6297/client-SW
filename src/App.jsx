@@ -7,7 +7,7 @@ import ScrollUpButton from './components/ScrollUpButton';
 import SiteLoader from './components/SiteLoader';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import ChatWidget from './components/ChatWidget'; 
+import ChatWidget from './components/ChatWidget';
 
 // Page Imports (Lazy Loaded for Performance)
 const Landing = React.lazy(() => import('./pages/Landing'));
@@ -21,37 +21,24 @@ const CardCreator = React.lazy(() => import('./components/CardCreator'));
 function App() {
   const location = useLocation();
 
-  // 1. Dynamic SEO Titles
-  useEffect(() => {
-    const routeTitles = {
-      "/": "SmoothWeb | Premium Portfolios & Digital Identity",
-      "/about": "About SmoothWeb | Mission & Purpose",
-      "/services": "Our Solutions | Portfolio & Ad Strategy",
-      "/portfolio": "Selected Works | SmoothWeb Portfolio",
-      "/contact": "Connect | SmoothWeb Digital Agency",
-      "/create": "Card Architect | Design Your Identity",
-      "/book": "Secure Consultation | Book Your Session"
-    };
 
-    document.title = routeTitles[location.pathname] || "SmoothWeb | Digital Excellence";
-  }, [location]);
 
-  // 2. Security & UI Logic
-  useEffect(() => {
-    // Restrict Right-Click
-    const handleContextMenu = (e) => e.preventDefault();
-    document.addEventListener('contextmenu', handleContextMenu);
-    return () => document.removeEventListener('contextmenu', handleContextMenu);
-  }, []);
+  // // 2. Security & UI Logic
+  // useEffect(() => {
+  //   // Restrict Right-Click
+  //   const handleContextMenu = (e) => e.preventDefault();
+  //   document.addEventListener('contextmenu', handleContextMenu);
+  //   return () => document.removeEventListener('contextmenu', handleContextMenu);
+  // }, []);
 
   return (
     <>
       <SiteLoader />
-      <ScrollToTop /> 
+      <ScrollToTop />
 
       <div className="flex flex-col min-h-screen relative">
         <Header />
-        
+
         <main className="flex-grow pt-20">
           <React.Suspense fallback={<SiteLoader />}>
             <Routes>
@@ -69,7 +56,7 @@ function App() {
         <Footer />
 
         {/* Floating Global Components */}
-        <ChatWidget /> 
+        <ChatWidget />
         <ScrollUpButton />
       </div>
     </>

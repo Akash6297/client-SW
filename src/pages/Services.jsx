@@ -36,8 +36,8 @@ export default function Services() {
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 px-6">
       <SEOHead 
-        title="Our Solutions | Portfolio & Ad Strategy"
-        description="Premium digital ecosystem providing Custom Portfolio Websites, Ad Growth Strategies, and Digital Identity Systems."
+        title="SEO Services & Digital Marketing Solutions | SmoothWeb"
+        description="Expert SEO services, PPC advertising, and real estate website design. We provide the strategic backbone for digital growth and branding."
         url="https://smoothweb.in/services"
       />
       <div className="max-w-7xl mx-auto">
@@ -49,7 +49,8 @@ export default function Services() {
              animate={{ opacity: 1, x: 0 }}
           >
             <h1 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter mb-6">
-                Solutions<span className="text-brand-primary">.</span>
+                Premium SEO & <br className="hidden md:block" />
+                <span className="text-brand-primary">Digital Solutions.</span>
             </h1>
             <p className="text-xl text-slate-500 max-w-2xl font-light leading-relaxed">
                 We provide the technical and strategic backbone for visionaries who refuse to be average. 
@@ -57,6 +58,19 @@ export default function Services() {
             </p>
           </motion.div>
         </header>
+      
+      {/* --- ENHANCED SEO BLOCK --- */}
+      <section className="sr-only">
+        <h2>About Akash Mandal and SmoothWeb</h2>
+        <p>
+          Founded by Akash Mandal, SmoothWeb is a leading digital visiting card platform and 
+          professional portfolio website agency in India. We specialize in creating digital 
+          identities that command trust and authority. Our mission is to provide freelancers, 
+          creatives, and small business owners with the technical tools needed for digital 
+          dominance, including NFC-ready business cards and high-end web development.
+        </p>
+      </section>
+
 
         {/* SERVICE GRID */}
         <div className="space-y-32 lg:space-y-48">
@@ -98,6 +112,19 @@ export default function Services() {
           ))}
         </div>
       </div>
+      
+      {/* --- ENHANCED SEO BLOCK --- */}
+      <section className="sr-only">
+        <h2>Core Digital Services by SmoothWeb</h2>
+        <p>
+          SmoothWeb provides a multi-disciplinary approach to growth through three primary pillars: 
+          Custom Portfolio Website Design, Strategic Ad Growth & PPC Marketing, and Digital Identity 
+          Systems. Our portfolio websites are built with React and Tailwind CSS for maximum speed 
+          and search engine optimization. We offer specialized solutions for real estate website 
+          design, photography portfolios, and personal branding. Our marketing engine leverages 
+          Meta and Google Ads to create high-conversion funnels for visionaries and small businesses.
+        </p>
+      </section>
     </div>
   );
 }
