@@ -4,8 +4,15 @@ import { motion } from 'framer-motion';
 import { FiGlobe, FiTrendingUp, FiLayers, FiZap, FiCheckCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb, HiOutlineDeviceMobile, HiOutlineChartBar } from 'react-icons/hi';
 import SEOHead from '../components/SEOHead'; // Import SEOHead
+import useSeoOverride from '../hooks/useSeoOverride';
 
 export default function Services() {
+  const seo = useSeoOverride('services', {
+    title: "SEO Services & Digital Marketing Solutions | SmoothWeb",
+    description: "Expert SEO services, PPC advertising, and real estate website design. We provide the strategic backbone for digital growth and branding.",
+    url: "https://smoothweb.in/services",
+  });
+
   const allServices = [
     {
       title: "Custom Portfolio Websites",
@@ -35,11 +42,7 @@ export default function Services() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 px-6">
-      <SEOHead 
-        title="SEO Services & Digital Marketing Solutions | SmoothWeb"
-        description="Expert SEO services, PPC advertising, and real estate website design. We provide the strategic backbone for digital growth and branding."
-        url="https://smoothweb.in/services"
-      />
+      <SEOHead {...seo} />
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER */}

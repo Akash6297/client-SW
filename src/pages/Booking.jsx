@@ -6,11 +6,19 @@ import {
   FiZap, FiCheckCircle, FiPhone, FiArrowRight, FiRefreshCw, FiCreditCard, FiAlertCircle, FiMail
 } from 'react-icons/fi';
 import SEOHead from '../components/SEOHead'; // Import SEOHead
+import useSeoOverride from '../hooks/useSeoOverride';
+import { ADMIN_SCRIPT_URL, SITE_API_KEY } from '../admin/config';
 
 // PASTE YOUR NEW DEPLOYED URL HERE
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4qfaB1bXSf7aql0JB0JTVqxzNxNaWAwTXFt6lYXgzMuK_zsLSm6GpMAoeGHtL-QTf/exec";
 
 export default function Booking() {
+  const seo = useSeoOverride('book', {
+    title: "Book Strategy Session | Digital Growth & UX Audit",
+    description: "Secure your spot for a premium strategy session. We discuss portfolio architecture, ad growth funnels, and digital identity synchronization.",
+    url: "https://smoothweb.in/book",
+  });
+
   const [selectedService, setSelectedService] = useState('Full Strategy Session');
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -90,6 +98,25 @@ export default function Booking() {
 
         try {
           await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(meetingData) });
+
+          // Record income in admin panel (fire-and-forget)
+          if (ADMIN_SCRIPT_URL) {
+            fetch(ADMIN_SCRIPT_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              body: JSON.stringify({
+                action: 'recordSale',
+                payload: {
+                  apiKey: SITE_API_KEY,
+                  amount: 49,
+                  category: 'Strategy Session',
+                  description: `Strategy: ${selectedService}`,
+                  client: formData.name,
+                },
+              }),
+            }).catch(() => {});
+          }
+
           setFinalBookingInfo(meetingData);
           setLoading(false);
           setShowSuccess(true);
@@ -109,11 +136,7 @@ export default function Booking() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 px-6 relative">
-      <SEOHead
-        title="Book Strategy Session | Digital Growth & UX Audit"
-        description="Secure your spot for a premium strategy session. We discuss portfolio architecture, ad growth funnels, and digital identity synchronization."
-        url="https://smoothweb.in/book"
-      />
+      <SEOHead {...seo} />
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-brand-primary font-bold uppercase tracking-[0.4em] text-[10px] mb-4 block underline">Verified Bookings Only</motion.span>

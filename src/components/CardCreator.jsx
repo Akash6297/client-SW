@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 import { FaInstagram, FaFacebookF, FaLinkedinIn, FaGithub, FaXTwitter, FaWhatsapp } from 'react-icons/fa6';
 import SEOHead from './SEOHead'; // Import SEOHead
+import { ADMIN_SCRIPT_URL, SITE_API_KEY } from '../admin/config';
 
 export default function CardCreator({ isLoggedIn }) {
   const frontDownloadRef = useRef(null);
@@ -108,6 +109,25 @@ export default function CardCreator({ isLoggedIn }) {
       image: "/favicon.png",
       handler: async function (response) {
         setIsDownloading(true);
+
+        // Record income in admin panel (fire-and-forget)
+        if (ADMIN_SCRIPT_URL) {
+          fetch(ADMIN_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+              action: 'recordSale',
+              payload: {
+                apiKey: SITE_API_KEY,
+                amount: finalAmount / 100,
+                category: 'Custom Card',
+                description: pricingTier === 'single' ? 'Standard Front-Side Card' : 'Full Dual-Side Premium Card',
+                client: data.name,
+              },
+            }),
+          }).catch(() => {});
+        }
+
         try {
             await executeDownload(frontDownloadRef, `SmoothWeb-${data.name}-Front.png`);
             if (pricingTier === 'dual') {

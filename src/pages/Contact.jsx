@@ -4,8 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaInstagram, FaLinkedinIn, FaFacebookF } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6'; // Latest X logo
 import SEOHead from '../components/SEOHead'; // Import SEOHead
+import useSeoOverride from '../hooks/useSeoOverride';
 
 export default function Contact() {
+  const seo = useSeoOverride('contact', {
+    title: "Contact SmoothWeb | Professional Portfolio & SEO Consultation",
+    description: "Connect with India's top portfolio design agency. Book your session for SEO services, PPC growth, or custom digital identity solutions.",
+    url: "https://smoothweb.in/contact",
+  });
+
   const [activeFaq, setActiveFaq] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
@@ -62,11 +69,7 @@ export default function Contact() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 overflow-x-hidden">
-      <SEOHead 
-        title="Contact SmoothWeb | Professional Portfolio & SEO Consultation"
-        description="Connect with India's top portfolio design agency. Book your session for SEO services, PPC growth, or custom digital identity solutions."
-        url="https://smoothweb.in/contact"
-      />
+      <SEOHead {...seo} />
       <div className="max-w-7xl mx-auto px-6">
         
         {/* --- HERO HEADER --- */}

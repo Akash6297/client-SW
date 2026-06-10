@@ -2,19 +2,22 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
+import useSeoOverride from '../hooks/useSeoOverride';
 import {
   FiGlobe, FiTrendingUp, FiLayers, FiZap, FiCheckCircle, FiShield,
   FiSearch, FiPenTool, FiCode
 } from 'react-icons/fi';
 
 export default function Landing() {
+  const seo = useSeoOverride('home', {
+    title: "SmoothWeb | Portfolio Website Design & Digital Marketing Agency India",
+    description: "SmoothWeb is the premier agency for portfolio website design, creative branding, and digital marketing in India. We build high-converting portfolios and ad funnels for visionaries.",
+    url: "https://smoothweb.in/",
+  });
+
   return (
     <div className="bg-white overflow-x-hidden mesh-gradient">
-      <SEOHead
-        title="SmoothWeb | Portfolio Website Design & Digital Marketing Agency India"
-        description="SmoothWeb is the premier agency for portfolio website design, creative branding, and digital marketing in India. We build high-converting portfolios and ad funnels for visionaries."
-        url="https://smoothweb.in/"
-      />
+      <SEOHead {...seo} />
 
       {/* --- HERO SECTION --- */}
       <section className="relative min-h-[90vh] flex items-center justify-center px-4 md:px-6 overflow-hidden pt-32 md:pt-20">

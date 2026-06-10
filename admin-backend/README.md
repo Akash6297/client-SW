@@ -1,0 +1,78 @@
+# SmoothWeb Admin Backend Setup (Google Sheets + Apps Script)
+
+This is the data store + API for the `/admin` panel. It costs nothing and
+needs no server — it's a Google Sheet plus an Apps Script "Web App".
+
+## 1. Create the Google Sheet
+
+1. Go to [sheets.google.com](https://sheets.google.com) and create a new blank spreadsheet.
+2. Name it something like **"SmoothWeb Admin DB"**.
+3. You don't need to create any tabs manually — the script creates them automatically.
+
+## 2. Add the Apps Script
+
+1. In the Sheet, go to **Extensions > Apps Script**.
+2. Delete the default contents of `Code.gs`.
+3. Copy the entire contents of [`Code.gs`](./Code.gs) from this folder and paste it in.
+4. At the top of the file, edit these two lines:
+   ```js
+   const NEW_ADMIN_PASSWORD = 'changeme123';        // <-- set your real admin password
+   const SITE_API_KEY = 'smoothweb-site-key-change-me'; // <-- set a long random string
+   ```
+   Pick a strong password — this is the password you'll use to log into `/admin`.
+   `SITE_API_KEY` is a separate secret used only to let the Booking/Card payment
+   flows record a sale automatically; any random string works.
+
+## 3. Run the one-time setup
+
+1. In the Apps Script editor, use the function dropdown (top toolbar) and select **`runSetup`**.
+2. Click **Run** (▶). The first time, Google will ask you to authorize the script — accept it (it only needs access to this one Sheet).
+3. Check the **Execution log** — it should say "Setup complete...".
+4. This creates all the sheet tabs (`Settings`, `SEO`, `Finance`, `Clients`, `Projects`, `Sessions`, `Pageviews`) and stores your hashed password.
+
+> You can change the admin password later from the Settings page in `/admin` —
+> you don't need to come back here unless something breaks.
+
+## 4. Deploy as a Web App
+
+1. Click **Deploy > New deployment**.
+2. Click the gear icon next to "Select type" and choose **Web app**.
+3. Configure:
+   - **Execute as**: `Me (your account)`
+   - **Who has access**: `Anyone`
+4. Click **Deploy**, authorize again if prompted.
+5. Copy the **Web app URL** (ends with `/exec`).
+
+## 5. Connect the frontend
+
+Open [`src/admin/config.js`](../src/admin/config.js) in this project and paste the URL:
+
+```js
+export const ADMIN_SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+export const SITE_API_KEY = "smoothweb-site-key-change-me"; // must match Code.gs
+```
+
+Make sure `SITE_API_KEY` here matches the one you set in `Code.gs` exactly.
+
+## 6. Log in
+
+1. Run the site (`npm run dev` or your deployed URL) and go to `/admin`.
+2. You'll be redirected to `/admin/login`. Enter the password you set in step 2.
+3. You're in! From here you can manage SEO, finances, clients, projects, and settings — including changing your password — without touching this script again.
+
+## Re-deploying after editing Code.gs
+
+If you ever edit `Code.gs` again (e.g. to add a feature), you must create a
+**new deployment version** for changes to take effect:
+**Deploy > Manage deployments > (pencil/edit icon) > Version: New version > Deploy**.
+The URL stays the same.
+
+## Notes on security
+
+- The admin password is stored only as a SHA-256 hash, never in plain text.
+- After 5 failed login attempts, login is locked for 15 minutes.
+- Sessions expire after 12 hours.
+- All write actions (and most read actions) require a valid session token,
+  checked on the server (Apps Script) — not just hidden in the UI.
+- This setup is appropriate for a single-admin small business tool. It is not
+  intended for high-security/multi-tenant use.

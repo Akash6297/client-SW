@@ -1,18 +1,20 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-export default function SEOHead({ 
-  title, 
-  description, 
-  url, 
+export default function SEOHead({
+  title,
+  description,
+  url,
   type = "website",
-  image = "https://smoothweb.in/og-image.png"
+  image = "https://smoothweb.in/og-image.png",
+  keywords
 }) {
   return (
     <Helmet>
       {/* Standard Metadata */}
       <title>{title}</title>
       <meta name="description" content={description} />
+      {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={url} />
 
       {/* Open Graph / Facebook */}

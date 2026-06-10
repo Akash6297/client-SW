@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import profileImg from '../assets/Akash.jpeg'; 
 import SEOHead from '../components/SEOHead'; // Import SEOHead
+import useSeoOverride from '../hooks/useSeoOverride';
 
 // Clean Social Icon Component
 const SocialIcon = ({ href, path }) => (
@@ -19,13 +20,15 @@ const SocialIcon = ({ href, path }) => (
 );
 
 export default function About() {
+  const seo = useSeoOverride('about', {
+    title: "About SmoothWeb | Leading Digital Visiting Card Platform India",
+    description: "SmoothWeb is a professional portfolio website agency and digital visiting card platform founded by Akash Mandal. We democratize high-end tech for creators.",
+    url: "https://smoothweb.in/about",
+  });
+
   return (
     <div className="bg-white min-h-screen pt-20 overflow-x-hidden">
-      <SEOHead 
-        title="About SmoothWeb | Leading Digital Visiting Card Platform India"
-        description="SmoothWeb is a professional portfolio website agency and digital visiting card platform founded by Akash Mandal. We democratize high-end tech for creators."
-        url="https://smoothweb.in/about"
-      />
+      <SEOHead {...seo} />
       
       {/* --- SECTION 1: MISSION & PURPOSE --- */}
       <section className="max-w-7xl mx-auto px-6 py-12 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">

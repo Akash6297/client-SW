@@ -6,8 +6,15 @@ import { Link } from 'react-router-dom';
 import sayandipImg from '../assets/sayandip.png';
 import udelineImg from '../assets/Udline.png';
 import SEOHead from '../components/SEOHead'; // Import SEOHead
+import useSeoOverride from '../hooks/useSeoOverride';
 
 export default function Portfolio() {
+  const seo = useSeoOverride('portfolio', {
+    title: "Portfolio Design Showreel | Web Developer & Photography Portfolios",
+    description: "Explore our work in photography portfolio website design, web developer portfolios, and personal branding models. High-retention cinematic digital footprints.",
+    url: "https://smoothweb.in/portfolio",
+  });
+
   const projects = [
     {
       title: "Sayandip Dutta | Premium Editor",
@@ -36,11 +43,7 @@ export default function Portfolio() {
 
   return (
     <div className="bg-white min-h-screen pt-32 pb-20 overflow-x-hidden">
-      <SEOHead 
-        title="Portfolio Design Showreel | Web Developer & Photography Portfolios"
-        description="Explore our work in photography portfolio website design, web developer portfolios, and personal branding models. High-retention cinematic digital footprints."
-        url="https://smoothweb.in/portfolio"
-      />
+      <SEOHead {...seo} />
       <div className="max-w-7xl mx-auto px-6">
         
         {/* --- HERO HEADER --- */}
