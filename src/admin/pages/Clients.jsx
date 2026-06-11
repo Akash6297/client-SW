@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiMail, FiPhone } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiMail, FiPhone, FiSend } from 'react-icons/fi';
 import AdminLayout from '../components/AdminLayout';
 import Modal from '../components/Modal';
 import { useAdminAuth } from '../context/AdminAuthContext';
@@ -122,6 +123,9 @@ export default function Clients() {
               {c.Notes && <p className="text-xs text-slate-400 mb-4 line-clamp-2">{c.Notes}</p>}
               <div className="flex items-center gap-2 pt-3 border-t border-slate-50">
                 <button onClick={() => openEdit(c)} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-primary"><FiEdit2 size={12} /> Edit</button>
+                {c.Email && (
+                  <Link to={`/admin/mail?client=${c.ID}`} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-primary"><FiSend size={12} /> Email</Link>
+                )}
                 <button onClick={() => handleDelete(c.ID)} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-red-500 ml-auto"><FiTrash2 size={12} /> Delete</button>
               </div>
             </div>

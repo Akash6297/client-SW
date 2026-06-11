@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FiGrid, FiSearch, FiDollarSign, FiUsers, FiTrello, FiBarChart2,
-  FiSettings, FiLogOut, FiMenu, FiX, FiExternalLink,
+  FiSettings, FiLogOut, FiMenu, FiX, FiExternalLink, FiMail,
 } from 'react-icons/fi';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { to: '/admin/clients', label: 'Clients', icon: <FiUsers /> },
   { to: '/admin/projects', label: 'Pipeline', icon: <FiTrello /> },
   { to: '/admin/analytics', label: 'Analytics', icon: <FiBarChart2 /> },
+  { to: '/admin/mail', label: 'Mail', icon: <FiMail /> },
   { to: '/admin/settings', label: 'Settings', icon: <FiSettings /> },
 ];
 

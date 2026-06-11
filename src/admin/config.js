@@ -1,5 +1,5 @@
 // PASTE YOUR DEPLOYED APPS SCRIPT WEB APP URL HERE (see admin-backend/README.md)
-export const ADMIN_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwh-tVtWZTdnyipTlzgepTSm8aXE_twyLrNrplungk7czya6nZqCAUi_xL2Qe_XhDZQ/exec";
+export const ADMIN_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2HaRaHqEX0je3EwrreZtjYMPVwL92XWhfL2y1q9sF7rBOO88CA9cbdYGWr-5mJ9J0/exec";
 
 // Must match SITE_API_KEY in admin-backend/Code.gs exactly.
 export const SITE_API_KEY = "smoothweb-site-key-change-me";
@@ -35,6 +35,69 @@ export const LEAD_STATUSES = [
   'Negotiating',
   'Converted',
   'Lost',
+];
+
+// Merge fields available when composing/customizing mail templates.
+// Resolved by src/admin/utils/mailMerge.js using the selected client +
+// the Business & Branding settings (saved from /admin/settings).
+export const MAIL_MERGE_FIELDS = [
+  { key: '{{client_name}}', label: 'Client Name' },
+  { key: '{{client_email}}', label: 'Client Email' },
+  { key: '{{business_name}}', label: 'Business Name' },
+  { key: '{{business_website}}', label: 'Website' },
+  { key: '{{business_phone}}', label: 'Phone' },
+  { key: '{{business_address}}', label: 'Address' },
+  { key: '{{logo_url}}', label: 'Logo URL' },
+  { key: '{{social_instagram}}', label: 'Instagram' },
+  { key: '{{social_facebook}}', label: 'Facebook' },
+  { key: '{{social_linkedin}}', label: 'LinkedIn' },
+  { key: '{{social_twitter}}', label: 'Twitter / X' },
+  { key: '{{social_youtube}}', label: 'YouTube' },
+  { key: '{{current_year}}', label: 'Current Year' },
+];
+
+// Reusable HTML blocks insertable into a mail template body via the editor
+// toolbar — lets the user build attractive, on-brand emails without writing
+// HTML from scratch. Use the merge fields above inside the snippet HTML.
+export const MAIL_SNIPPETS = [
+  {
+    label: 'Logo Header',
+    html: `<div style="text-align:center;padding:16px 0;">
+  <img src="{{logo_url}}" alt="{{business_name}}" style="max-height:50px;" />
+  <h2 style="margin:8px 0 0;font-family:Arial,sans-serif;color:#0f172a;">{{business_name}}</h2>
+</div>`,
+  },
+  {
+    label: 'Image Block',
+    html: `<div style="text-align:center;margin:20px 0;">
+  <img src="https://your-image-url.com/image.jpg" alt="" style="max-width:100%;border-radius:12px;" />
+</div>`,
+  },
+  {
+    label: 'Button / CTA',
+    html: `<p style="text-align:center;margin:28px 0;">
+  <a href="{{business_website}}" style="background:#6366f1;color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">Click Here</a>
+</p>`,
+  },
+  {
+    label: 'Social Links',
+    html: `<p style="text-align:center;margin:20px 0;">
+  <a href="{{social_instagram}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Instagram</a>
+  <a href="{{social_facebook}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Facebook</a>
+  <a href="{{social_linkedin}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">LinkedIn</a>
+  <a href="{{social_twitter}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Twitter</a>
+</p>`,
+  },
+  {
+    label: 'Signature / Footer',
+    html: `<p style="margin-top:24px;font-size:13px;color:#475569;">
+  Best regards,<br/>
+  <strong>{{business_name}}</strong><br/>
+  {{business_phone}}<br/>
+  {{business_website}}<br/>
+  {{business_address}}
+</p>`,
+  },
 ];
 
 // Pages whose SEO meta tags can be managed from /admin/seo.

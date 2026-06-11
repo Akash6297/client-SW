@@ -10,6 +10,7 @@ import Finance from './pages/Finance';
 import Clients from './pages/Clients';
 import Projects from './pages/Projects';
 import Analytics from './pages/Analytics';
+import Mail from './pages/Mail';
 import Settings from './pages/Settings';
 
 export default function AdminApp() {
@@ -23,6 +24,7 @@ export default function AdminApp() {
         <Route path="clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
         <Route path="projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
         <Route path="analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+        <Route path="mail" element={<ProtectedRoute><Mail /></ProtectedRoute>} />
         <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </AdminAuthProvider>

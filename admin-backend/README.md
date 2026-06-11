@@ -67,6 +67,24 @@ If you ever edit `Code.gs` again (e.g. to add a feature), you must create a
 **Deploy > Manage deployments > (pencil/edit icon) > Version: New version > Deploy**.
 The URL stays the same.
 
+## Mail (Compose & Send / Templates)
+
+The `/admin/mail` page lets you email clients directly from the admin panel
+using customizable HTML templates.
+
+- Templates are stored in the **MailTemplates** sheet (created automatically).
+  `runSetup` seeds 3 starter templates the first time it runs.
+- Sending uses `MailApp.sendEmail()`, which sends from **your own Google
+  account** (the one that deployed this script) — no extra setup needed.
+  Google's daily sending limit applies (~100/day for a personal Gmail
+  account, ~1500/day for Google Workspace).
+- The first time you send an email after adding this feature, Google may ask
+  you to **re-authorize** the script (it now requests permission to send
+  email on your behalf).
+- Fill in **Settings > Business & Email Branding** (business name, logo URL,
+  socials, contact info) — these values fill in the `{{merge_fields}}` used
+  by templates so emails look professional and on-brand.
+
 ## Notes on security
 
 - The admin password is stored only as a SHA-256 hash, never in plain text.
