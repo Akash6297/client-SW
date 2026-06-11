@@ -1,5 +1,5 @@
 // PASTE YOUR DEPLOYED APPS SCRIPT WEB APP URL HERE (see admin-backend/README.md)
-export const ADMIN_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2HaRaHqEX0je3EwrreZtjYMPVwL92XWhfL2y1q9sF7rBOO88CA9cbdYGWr-5mJ9J0/exec";
+export const ADMIN_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc9n12qbsAwUkVNXuXLX4iVU7kV7KG47gi7cbucqhrFyypkhIxChaVneQK6dWmbOYK/exec";
 
 // Must match SITE_API_KEY in admin-backend/Code.gs exactly.
 export const SITE_API_KEY = "smoothweb-site-key-change-me";
@@ -54,6 +54,9 @@ export const MAIL_MERGE_FIELDS = [
   { key: '{{social_twitter}}', label: 'Twitter / X' },
   { key: '{{social_youtube}}', label: 'YouTube' },
   { key: '{{current_year}}', label: 'Current Year' },
+  { key: '{{color_primary}}', label: 'Theme: Primary Color' },
+  { key: '{{color_header}}', label: 'Theme: Header Color' },
+  { key: '{{color_text}}', label: 'Theme: Text Color' },
 ];
 
 // Reusable HTML blocks insertable into a mail template body via the editor
@@ -64,7 +67,7 @@ export const MAIL_SNIPPETS = [
     label: 'Logo Header',
     html: `<div style="text-align:center;padding:16px 0;">
   <img src="{{logo_url}}" alt="{{business_name}}" style="max-height:50px;" />
-  <h2 style="margin:8px 0 0;font-family:Arial,sans-serif;color:#0f172a;">{{business_name}}</h2>
+  <h2 style="margin:8px 0 0;font-family:Arial,sans-serif;color:{{color_header}};">{{business_name}}</h2>
 </div>`,
   },
   {
@@ -76,16 +79,16 @@ export const MAIL_SNIPPETS = [
   {
     label: 'Button / CTA',
     html: `<p style="text-align:center;margin:28px 0;">
-  <a href="{{business_website}}" style="background:#6366f1;color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">Click Here</a>
+  <a href="{{business_website}}" style="background:{{color_primary}};color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">Click Here</a>
 </p>`,
   },
   {
     label: 'Social Links',
     html: `<p style="text-align:center;margin:20px 0;">
-  <a href="{{social_instagram}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Instagram</a>
-  <a href="{{social_facebook}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Facebook</a>
-  <a href="{{social_linkedin}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">LinkedIn</a>
-  <a href="{{social_twitter}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Twitter</a>
+  <a href="{{social_instagram}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Instagram</a>
+  <a href="{{social_facebook}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Facebook</a>
+  <a href="{{social_linkedin}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">LinkedIn</a>
+  <a href="{{social_twitter}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Twitter</a>
 </p>`,
   },
   {

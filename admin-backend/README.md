@@ -72,8 +72,10 @@ The URL stays the same.
 The `/admin/mail` page lets you email clients directly from the admin panel
 using customizable HTML templates.
 
-- Templates are stored in the **MailTemplates** sheet (created automatically).
-  `runSetup` seeds 3 starter templates the first time it runs.
+- Templates are stored in the **MailTemplates** sheet (created automatically,
+  with `ColorPrimary`/`ColorHeader`/`ColorText` columns added automatically if
+  you're upgrading from an older version). `runSetup` seeds 3 starter
+  templates the first time it runs.
 - Sending uses `MailApp.sendEmail()`, which sends from **your own Google
   account** (the one that deployed this script) — no extra setup needed.
   Google's daily sending limit applies (~100/day for a personal Gmail
@@ -84,6 +86,31 @@ using customizable HTML templates.
 - Fill in **Settings > Business & Email Branding** (business name, logo URL,
   socials, contact info) — these values fill in the `{{merge_fields}}` used
   by templates so emails look professional and on-brand.
+
+### Theme colors
+
+Each template (and the Compose screen) has a **Theme Colors** picker for
+Primary/Buttons, Header Background, and Body Text. These map to
+`{{color_primary}}`, `{{color_header}}` and `{{color_text}}` merge fields
+used throughout the default templates and snippets, so changing them
+re-themes the whole email.
+
+### Bulk send
+
+On the Compose screen you can tick multiple clients (and/or paste extra,
+comma/newline-separated email addresses) to send the same message to
+everyone at once. Each recipient still gets `{{client_name}}` etc. resolved
+with their own details. Sending to 2+ recipients uses the `sendBulkMail`
+action (max 100 per batch).
+
+## Booking & Contact form leads
+
+The public **Booking** (`/book`) and **Contact** (`/contact`) pages send a
+copy of each submission to this same Sheet via the public `submitLead`
+action (secured with `SITE_API_KEY`, like `recordSale`). They show up in
+**Clients & Leads** (`/admin/clients`) with `Source` set to `Booking - …` or
+`Contact Form`, so you can see them and reply via **Email > Mail** right from
+the admin panel.
 
 ## Notes on security
 

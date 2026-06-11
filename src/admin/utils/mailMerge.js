@@ -1,8 +1,20 @@
 // Replaces {{merge_field}} placeholders in mail template subjects/bodies with
-// real values from the selected client and the Settings sheet (Business &
-// Branding section). Used by the Mail compose/template editor for live
-// previews and for the final email sent to the client.
-export function resolveMergeFields(text, { client, settings } = {}) {
+// real values from the selected client, the Settings sheet (Business &
+// Branding section), and the chosen template theme colors. Used by the Mail
+// compose/template editor for live previews and for the final email sent to
+// the client.
+export const DEFAULT_MAIL_COLORS = {
+  primary: '#6366f1',
+  header: '#0f172a',
+  text: '#1e293b',
+};
+
+export function resolveMergeFields(text, { client, settings, colors } = {}) {
+  const c = { ...DEFAULT_MAIL_COLORS, ...colors };
+  const primary = c.primary || DEFAULT_MAIL_COLORS.primary;
+  const header = c.header || DEFAULT_MAIL_COLORS.header;
+  const txt = c.text || DEFAULT_MAIL_COLORS.text;
+
   const map = {
     '{{client_name}}': client?.Name || 'there',
     '{{client_email}}': client?.Email || '',
@@ -17,6 +29,15 @@ export function resolveMergeFields(text, { client, settings } = {}) {
     '{{social_twitter}}': settings?.SOCIAL_TWITTER || '',
     '{{social_youtube}}': settings?.SOCIAL_YOUTUBE || '',
     '{{current_year}}': String(new Date().getFullYear()),
+    '{{color_primary}}': primary,
+    '{{color_header}}': header,
+    '{{color_text}}': txt,
+    // Older templates (saved before theme colors existed) have these
+    // hex codes hardcoded instead of {{color_*}} merge fields. Re-theme
+    // them too so the color pickers also affect existing templates.
+    [DEFAULT_MAIL_COLORS.primary]: primary,
+    [DEFAULT_MAIL_COLORS.header]: header,
+    [DEFAULT_MAIL_COLORS.text]: txt,
   };
 
   return Object.keys(map).reduce(

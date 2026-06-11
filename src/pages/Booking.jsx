@@ -115,6 +115,25 @@ export default function Booking() {
                 },
               }),
             }).catch(() => {});
+
+            // Add this booking as a lead/client in the admin panel so it can
+            // be viewed and replied to via Mail (fire-and-forget).
+            fetch(ADMIN_SCRIPT_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              body: JSON.stringify({
+                action: 'submitLead',
+                payload: {
+                  apiKey: SITE_API_KEY,
+                  name: formData.name,
+                  email: formData.email,
+                  phone: formData.phone,
+                  status: 'Converted',
+                  source: `Booking - ${selectedService}`,
+                  notes: `Paid strategy session booked for ${formData.date} at ${formData.time}.\nPayment ID: ${response.razorpay_payment_id}`,
+                },
+              }),
+            }).catch(() => {});
           }
 
           setFinalBookingInfo(meetingData);

@@ -5,6 +5,7 @@ import { FaInstagram, FaLinkedinIn, FaFacebookF } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6'; // Latest X logo
 import SEOHead from '../components/SEOHead'; // Import SEOHead
 import useSeoOverride from '../hooks/useSeoOverride';
+import { ADMIN_SCRIPT_URL, SITE_API_KEY } from '../admin/config';
 
 export default function Contact() {
   const seo = useSeoOverride('contact', {
@@ -37,6 +38,27 @@ export default function Contact() {
         method: 'POST',
         body: JSON.stringify(formData),
       });
+
+      // Add this enquiry as a lead/client in the admin panel so it can be
+      // viewed and replied to via Mail (fire-and-forget).
+      if (ADMIN_SCRIPT_URL) {
+        fetch(ADMIN_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify({
+            action: 'submitLead',
+            payload: {
+              apiKey: SITE_API_KEY,
+              name: formData.fullName,
+              email: formData.email,
+              status: 'New',
+              source: 'Contact Form',
+              notes: `Subject: ${formData.subject}\n\n${formData.message}`,
+            },
+          }),
+        }).catch(() => {});
+      }
+
       setStatus("success");
       setFormData({ fullName: "", email: "", subject: "", message: "" });
     } catch (error) {

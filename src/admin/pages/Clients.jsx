@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiMail, FiPhone, FiSend } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiMail, FiPhone, FiSend, FiEye, FiClock } from 'react-icons/fi';
 import AdminLayout from '../components/AdminLayout';
 import Modal from '../components/Modal';
 import { useAdminAuth } from '../context/AdminAuthContext';
@@ -22,6 +22,7 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewing, setViewing] = useState(null);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState('');
@@ -121,7 +122,9 @@ export default function Clients() {
                 {c.Phone && <p className="flex items-center gap-2 text-xs text-slate-500"><FiPhone size={12} /> {c.Phone}</p>}
               </div>
               {c.Notes && <p className="text-xs text-slate-400 mb-4 line-clamp-2">{c.Notes}</p>}
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-50">
+              {c.CreatedAt && <p className="flex items-center gap-1.5 text-[10px] text-slate-300 mb-3 -mt-2"><FiClock size={11} /> {new Date(c.CreatedAt).toLocaleString()}</p>}
+              <div className="flex items-center gap-2 pt-3 border-t border-slate-50 flex-wrap">
+                <button onClick={() => setViewing(c)} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-primary"><FiEye size={12} /> View</button>
                 <button onClick={() => openEdit(c)} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-primary"><FiEdit2 size={12} /> Edit</button>
                 {c.Email && (
                   <Link to={`/admin/mail?client=${c.ID}`} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand-primary"><FiSend size={12} /> Email</Link>
@@ -131,6 +134,48 @@ export default function Clients() {
             </div>
           ))}
         </div>
+      )}
+
+      {viewing && (
+        <Modal title={viewing.Name || 'Lead Details'} onClose={() => setViewing(null)}>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${STATUS_COLORS[viewing.Status] || 'bg-slate-100 text-slate-400'}`}>{viewing.Status}</span>
+              {viewing.Source && <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">via {viewing.Source}</span>}
+              {viewing.CreatedAt && <span className="flex items-center gap-1 text-[10px] text-slate-400"><FiClock size={11} /> {new Date(viewing.CreatedAt).toLocaleString()}</span>}
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {viewing.Email && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
+                  <p className="font-bold text-slate-800 break-all">{viewing.Email}</p>
+                </div>
+              )}
+              {viewing.Phone && (
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
+                  <p className="font-bold text-slate-800">{viewing.Phone}</p>
+                </div>
+              )}
+            </div>
+            {viewing.Notes && (
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Message / Notes</p>
+                <p className="text-sm text-slate-700 whitespace-pre-wrap bg-slate-50 border border-slate-100 rounded-2xl p-4">{viewing.Notes}</p>
+              </div>
+            )}
+            <div className="flex items-center gap-3 pt-2">
+              {viewing.Email && (
+                <Link to={`/admin/mail?client=${viewing.ID}`} onClick={() => setViewing(null)} className="flex items-center gap-2 bg-brand-primary text-white text-[10px] font-black uppercase tracking-widest px-5 py-3 rounded-2xl hover:brightness-110 transition-all">
+                  <FiSend size={12} /> Reply via Mail
+                </Link>
+              )}
+              <button onClick={() => { setViewing(null); openEdit(viewing); }} className="flex items-center gap-2 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest px-5 py-3 rounded-2xl hover:bg-slate-200 transition-all">
+                <FiEdit2 size={12} /> Edit
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       {modalOpen && (

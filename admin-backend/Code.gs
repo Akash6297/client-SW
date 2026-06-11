@@ -36,12 +36,12 @@ const SHEET_CONFIG = {
   Projects: ['ID', 'Title', 'Client', 'Stage', 'Value', 'DueDate', 'Notes', 'CreatedAt', 'UpdatedAt'],
   Sessions: ['Token', 'ExpiresAt', 'CreatedAt'],
   Pageviews: ['Date', 'Path', 'Count'],
-  MailTemplates: ['ID', 'Name', 'Subject', 'Body', 'CreatedAt', 'UpdatedAt'],
+  MailTemplates: ['ID', 'Name', 'Subject', 'Body', 'ColorPrimary', 'ColorHeader', 'ColorText', 'CreatedAt', 'UpdatedAt'],
 };
 
 const PUBLIC_SETTING_KEYS = ['GA_MEASUREMENT_ID', 'ROBOTS_TXT', 'SITE_NAME'];
 
-const PUBLIC_ACTIONS = ['login', 'getSeo', 'getPublicSettings', 'logPageview', 'recordSale'];
+const PUBLIC_ACTIONS = ['login', 'getSeo', 'getPublicSettings', 'logPageview', 'recordSale', 'submitLead'];
 
 // ===================== ENTRY POINTS =====================
 
@@ -93,6 +93,7 @@ function route(action, token, payload) {
     case 'addClient': return handleAddClient(payload);
     case 'updateClient': return handleUpdateClient(payload);
     case 'deleteClient': return handleDeleteClient(payload);
+    case 'submitLead': return handleSubmitLead(payload);
 
     case 'getProjects': return handleGetProjects();
     case 'addProject': return handleAddProject(payload);
@@ -106,6 +107,7 @@ function route(action, token, payload) {
     case 'saveMailTemplate': return handleSaveMailTemplate(payload);
     case 'deleteMailTemplate': return handleDeleteMailTemplate(payload);
     case 'sendMail': return handleSendMail(payload);
+    case 'sendBulkMail': return handleSendBulkMail(payload);
 
     default: return jsonResponse({ success: false, error: 'Unknown action' });
   }
@@ -376,6 +378,34 @@ function handleDeleteClient(payload) {
   return jsonResponse({ success: true });
 }
 
+// Public action: triggered from the Booking and Contact pages on the public
+// site so submissions land directly in the Clients sheet (visible + emailable
+// from /admin/clients and /admin/mail). Requires SITE_API_KEY to deter spam.
+function handleSubmitLead(payload) {
+  if (payload.apiKey !== SITE_API_KEY) {
+    return jsonResponse({ success: false, error: 'Unauthorized' });
+  }
+  if (!payload.name && !payload.email) {
+    return jsonResponse({ success: false, error: 'Name or email is required.' });
+  }
+
+  const sheet = getSheet('Clients');
+  const now = new Date().toISOString();
+  const entry = {
+    ID: Utilities.getUuid(),
+    Name: payload.name || '',
+    Email: payload.email || '',
+    Phone: payload.phone || '',
+    Status: payload.status || 'New',
+    Source: payload.source || 'Website',
+    Notes: payload.notes || '',
+    CreatedAt: now,
+    UpdatedAt: now,
+  };
+  appendRow(sheet, entry);
+  return jsonResponse({ success: true, data: entry });
+}
+
 // ===================== PROJECTS =====================
 
 function handleGetProjects() {
@@ -493,6 +523,9 @@ function handleSaveMailTemplate(payload) {
       Name: payload.name || '',
       Subject: payload.subject || '',
       Body: payload.body || '',
+      ColorPrimary: payload.colorPrimary || '#6366f1',
+      ColorHeader: payload.colorHeader || '#0f172a',
+      ColorText: payload.colorText || '#1e293b',
       UpdatedAt: now,
     });
     return jsonResponse({ success: true });
@@ -503,6 +536,9 @@ function handleSaveMailTemplate(payload) {
     Name: payload.name || '',
     Subject: payload.subject || '',
     Body: payload.body || '',
+    ColorPrimary: payload.colorPrimary || '#6366f1',
+    ColorHeader: payload.colorHeader || '#0f172a',
+    ColorText: payload.colorText || '#1e293b',
     CreatedAt: now,
     UpdatedAt: now,
   };
@@ -529,18 +565,10 @@ function handleSendMail(payload) {
   if (!subject) return jsonResponse({ success: false, error: 'Subject is required.' });
   if (!html) return jsonResponse({ success: false, error: 'Email body is required.' });
 
-  const settingsSheet = getSheet('Settings');
-  const settings = {};
-  sheetToObjects(settingsSheet).forEach((r) => { settings[r.Key] = r.Value; });
-
-  const options = {
-    htmlBody: html,
-    name: settings.BUSINESS_NAME || settings.SITE_NAME || 'SmoothWeb',
-  };
-  if (settings.BUSINESS_EMAIL) options.replyTo = settings.BUSINESS_EMAIL;
+  const options = getMailOptions();
 
   try {
-    MailApp.sendEmail(to, subject, html.replace(/<[^>]+>/g, ' '), options);
+    MailApp.sendEmail(to, subject, html.replace(/<[^>]+>/g, ' '), Object.assign({ htmlBody: html }, options));
   } catch (err) {
     return jsonResponse({ success: false, error: err.message });
   }
@@ -548,16 +576,78 @@ function handleSendMail(payload) {
   return jsonResponse({ success: true });
 }
 
+// Sends a personalized copy of an email to many recipients at once — used by
+// the /admin/mail "Compose & Send" page when multiple clients are selected.
+// payload.messages: [{ to, subject, html }, ...]
+function handleSendBulkMail(payload) {
+  const messages = Array.isArray(payload.messages) ? payload.messages : [];
+  if (!messages.length) return jsonResponse({ success: false, error: 'No recipients provided.' });
+  if (messages.length > 100) return jsonResponse({ success: false, error: 'Too many recipients in one batch (max 100).' });
+
+  const options = getMailOptions();
+  const results = [];
+
+  messages.forEach((m) => {
+    const to = String(m.to || '').trim();
+    const subject = String(m.subject || '').trim();
+    const html = String(m.html || '');
+
+    if (!to || !subject || !html) {
+      results.push({ to: to || '(missing)', success: false, error: 'Missing to/subject/body.' });
+      return;
+    }
+    try {
+      MailApp.sendEmail(to, subject, html.replace(/<[^>]+>/g, ' '), Object.assign({ htmlBody: html }, options));
+      results.push({ to, success: true });
+    } catch (err) {
+      results.push({ to, success: false, error: err.message });
+    }
+  });
+
+  return jsonResponse({ success: true, data: results });
+}
+
+function getMailOptions() {
+  const settingsSheet = getSheet('Settings');
+  const settings = {};
+  sheetToObjects(settingsSheet).forEach((r) => { settings[r.Key] = r.Value; });
+
+  const options = {
+    name: settings.BUSINESS_NAME || settings.SITE_NAME || 'SmoothWeb',
+  };
+  if (settings.BUSINESS_EMAIL) options.replyTo = settings.BUSINESS_EMAIL;
+  return options;
+}
+
 // ===================== SHEET HELPERS =====================
 
 function getSheet(name) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(name);
+  const expectedHeaders = SHEET_CONFIG[name] || [];
+
   if (!sheet) {
     sheet = ss.insertSheet(name);
-    sheet.appendRow(SHEET_CONFIG[name]);
+    sheet.appendRow(expectedHeaders);
+    return sheet;
   }
+
+  // Migration: if SHEET_CONFIG has gained columns since this sheet was
+  // created, append the missing headers so appendRow/updateRowByIndex
+  // (which read the sheet's actual header row) keep working.
+  const lastCol = sheet.getLastColumn();
+  const existingHeaders = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  const missing = expectedHeaders.filter((h) => existingHeaders.indexOf(h) === -1);
+  if (missing.length > 0) {
+    sheet.getRange(1, existingHeaders.length + 1, 1, missing.length).setValues([missing]);
+  }
+
   return sheet;
+}
+
+function getSheetHeaders(sheet) {
+  const lastCol = sheet.getLastColumn();
+  return lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
 }
 
 function sheetToObjects(sheet) {
@@ -574,14 +664,14 @@ function sheetToObjects(sheet) {
 }
 
 function appendRow(sheet, obj) {
-  const headers = SHEET_CONFIG[sheet.getName()];
+  const headers = getSheetHeaders(sheet);
   const row = headers.map((h) => (obj[h] !== undefined ? obj[h] : ''));
   sheet.appendRow(row);
 }
 
 // index is 0-based position within data rows (excluding header)
 function updateRowByIndex(sheet, index, updates) {
-  const headers = SHEET_CONFIG[sheet.getName()];
+  const headers = getSheetHeaders(sheet);
   const rowNumber = index + 2; // +1 for header, +1 for 1-based
   const currentValues = sheet.getRange(rowNumber, 1, 1, headers.length).getValues()[0];
 
@@ -657,7 +747,17 @@ function runSetup() {
   if (sheetToObjects(mailSheet).length === 0) {
     DEFAULT_MAIL_TEMPLATES.forEach((t) => {
       const now = new Date().toISOString();
-      appendRow(mailSheet, { ID: Utilities.getUuid(), Name: t.name, Subject: t.subject, Body: t.body, CreatedAt: now, UpdatedAt: now });
+      appendRow(mailSheet, {
+        ID: Utilities.getUuid(),
+        Name: t.name,
+        Subject: t.subject,
+        Body: t.body,
+        ColorPrimary: t.colorPrimary || '#6366f1',
+        ColorHeader: t.colorHeader || '#0f172a',
+        ColorText: t.colorText || '#1e293b',
+        CreatedAt: now,
+        UpdatedAt: now,
+      });
     });
   }
 
@@ -671,16 +771,19 @@ const DEFAULT_MAIL_TEMPLATES = [
   {
     name: 'Welcome / Introduction',
     subject: "Let's build something great together, {{client_name}}!",
+    colorPrimary: '#6366f1',
+    colorHeader: '#0f172a',
+    colorText: '#1e293b',
     body: `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #eee;border-radius:12px;overflow:hidden;">
-  <div style="background:#0f172a;padding:24px;text-align:center;">
+  <div style="background:{{color_header}};padding:24px;text-align:center;">
     <h1 style="color:#ffffff;font-size:18px;margin:0;letter-spacing:2px;text-transform:uppercase;">{{business_name}}</h1>
   </div>
-  <div style="padding:32px 28px;color:#1e293b;font-size:15px;line-height:1.6;">
-    <h2 style="margin:0 0 16px;font-size:20px;color:#0f172a;">Hi {{client_name}},</h2>
+  <div style="padding:32px 28px;color:{{color_text}};font-size:15px;line-height:1.6;">
+    <h2 style="margin:0 0 16px;font-size:20px;color:{{color_header}};">Hi {{client_name}},</h2>
     <p>Thank you for your interest in {{business_name}}! We specialize in crafting premium portfolio websites, digital branding, and growth-focused marketing for ambitious creators and businesses.</p>
     <p>We'd love to learn more about your project and show you how we can help bring your vision to life.</p>
     <p style="text-align:center;margin:28px 0;">
-      <a href="{{business_website}}" style="background:#6366f1;color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">Visit Our Website</a>
+      <a href="{{business_website}}" style="background:{{color_primary}};color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">Visit Our Website</a>
     </p>
     <p>Looking forward to working with you!</p>
     <p>Warm regards,<br/>The {{business_name}} Team</p>
@@ -688,10 +791,10 @@ const DEFAULT_MAIL_TEMPLATES = [
   <div style="background:#f8fafc;padding:24px 28px;text-align:center;border-top:1px solid #eee;">
     <p style="margin:0 0 12px;font-size:13px;color:#64748b;">{{business_address}} · {{business_phone}}</p>
     <p style="margin:0 0 12px;">
-      <a href="{{social_instagram}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Instagram</a>
-      <a href="{{social_facebook}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Facebook</a>
-      <a href="{{social_linkedin}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">LinkedIn</a>
-      <a href="{{business_website}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Website</a>
+      <a href="{{social_instagram}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Instagram</a>
+      <a href="{{social_facebook}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Facebook</a>
+      <a href="{{social_linkedin}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">LinkedIn</a>
+      <a href="{{business_website}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Website</a>
     </p>
     <p style="margin:0;font-size:11px;color:#94a3b8;">© {{current_year}} {{business_name}}. All rights reserved.</p>
   </div>
@@ -700,26 +803,29 @@ const DEFAULT_MAIL_TEMPLATES = [
   {
     name: 'Proposal Follow-up',
     subject: 'Following up — your project with {{business_name}}',
+    colorPrimary: '#6366f1',
+    colorHeader: '#0f172a',
+    colorText: '#1e293b',
     body: `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #eee;border-radius:12px;overflow:hidden;">
-  <div style="background:#0f172a;padding:24px;text-align:center;">
+  <div style="background:{{color_header}};padding:24px;text-align:center;">
     <h1 style="color:#ffffff;font-size:18px;margin:0;letter-spacing:2px;text-transform:uppercase;">{{business_name}}</h1>
   </div>
-  <div style="padding:32px 28px;color:#1e293b;font-size:15px;line-height:1.6;">
-    <h2 style="margin:0 0 16px;font-size:20px;color:#0f172a;">Hi {{client_name}},</h2>
+  <div style="padding:32px 28px;color:{{color_text}};font-size:15px;line-height:1.6;">
+    <h2 style="margin:0 0 16px;font-size:20px;color:{{color_header}};">Hi {{client_name}},</h2>
     <p>Just following up on our recent conversation. We're excited about the opportunity to work together and wanted to check if you have any questions about the proposal we discussed.</p>
     <p>Whenever you're ready to move forward, just reply to this email{{business_phone}} — we'll get things rolling right away.</p>
     <p style="text-align:center;margin:28px 0;">
-      <a href="{{business_website}}" style="background:#6366f1;color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">View Our Work</a>
+      <a href="{{business_website}}" style="background:{{color_primary}};color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">View Our Work</a>
     </p>
     <p>Best,<br/>The {{business_name}} Team</p>
   </div>
   <div style="background:#f8fafc;padding:24px 28px;text-align:center;border-top:1px solid #eee;">
     <p style="margin:0 0 12px;font-size:13px;color:#64748b;">{{business_address}} · {{business_phone}}</p>
     <p style="margin:0 0 12px;">
-      <a href="{{social_instagram}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Instagram</a>
-      <a href="{{social_facebook}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Facebook</a>
-      <a href="{{social_linkedin}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">LinkedIn</a>
-      <a href="{{business_website}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Website</a>
+      <a href="{{social_instagram}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Instagram</a>
+      <a href="{{social_facebook}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Facebook</a>
+      <a href="{{social_linkedin}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">LinkedIn</a>
+      <a href="{{business_website}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Website</a>
     </p>
     <p style="margin:0;font-size:11px;color:#94a3b8;">© {{current_year}} {{business_name}}. All rights reserved.</p>
   </div>
@@ -728,16 +834,19 @@ const DEFAULT_MAIL_TEMPLATES = [
   {
     name: 'Project Delivered / Thank You',
     subject: 'Your project is live!',
+    colorPrimary: '#6366f1',
+    colorHeader: '#0f172a',
+    colorText: '#1e293b',
     body: `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #eee;border-radius:12px;overflow:hidden;">
-  <div style="background:#0f172a;padding:24px;text-align:center;">
+  <div style="background:{{color_header}};padding:24px;text-align:center;">
     <h1 style="color:#ffffff;font-size:18px;margin:0;letter-spacing:2px;text-transform:uppercase;">{{business_name}}</h1>
   </div>
-  <div style="padding:32px 28px;color:#1e293b;font-size:15px;line-height:1.6;">
-    <h2 style="margin:0 0 16px;font-size:20px;color:#0f172a;">Hi {{client_name}},</h2>
+  <div style="padding:32px 28px;color:{{color_text}};font-size:15px;line-height:1.6;">
+    <h2 style="margin:0 0 16px;font-size:20px;color:{{color_header}};">Hi {{client_name}},</h2>
     <p>Great news — your project is now complete and live! It's been a pleasure working with you, and we hope it helps you achieve your goals.</p>
     <p>If you need any tweaks, support, or want to discuss your next project, we're just an email away.</p>
     <p style="text-align:center;margin:28px 0;">
-      <a href="{{business_website}}" style="background:#6366f1;color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">View Live Site</a>
+      <a href="{{business_website}}" style="background:{{color_primary}};color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">View Live Site</a>
     </p>
     <p>Thank you for trusting {{business_name}}!</p>
     <p>Warm regards,<br/>The {{business_name}} Team</p>
@@ -745,10 +854,10 @@ const DEFAULT_MAIL_TEMPLATES = [
   <div style="background:#f8fafc;padding:24px 28px;text-align:center;border-top:1px solid #eee;">
     <p style="margin:0 0 12px;font-size:13px;color:#64748b;">{{business_address}} · {{business_phone}}</p>
     <p style="margin:0 0 12px;">
-      <a href="{{social_instagram}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Instagram</a>
-      <a href="{{social_facebook}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Facebook</a>
-      <a href="{{social_linkedin}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">LinkedIn</a>
-      <a href="{{business_website}}" style="color:#6366f1;text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Website</a>
+      <a href="{{social_instagram}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Instagram</a>
+      <a href="{{social_facebook}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Facebook</a>
+      <a href="{{social_linkedin}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">LinkedIn</a>
+      <a href="{{business_website}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 6px;">Website</a>
     </p>
     <p style="margin:0;font-size:11px;color:#94a3b8;">© {{current_year}} {{business_name}}. All rights reserved.</p>
   </div>
