@@ -7,9 +7,10 @@ import MailBodyEditor from '../components/MailBodyEditor';
 import MailColorPicker from '../components/MailColorPicker';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { callAdminApi } from '../api/client';
+import { MAIL_DEFAULT_BODY } from '../config';
 import { resolveMergeFields, DEFAULT_MAIL_COLORS } from '../utils/mailMerge';
 
-const emptyTemplate = { name: '', subject: '', body: '', colors: { ...DEFAULT_MAIL_COLORS } };
+const emptyTemplate = { name: '', subject: '', body: MAIL_DEFAULT_BODY, colors: { ...DEFAULT_MAIL_COLORS } };
 
 const parseExtraEmails = (text) =>
   (text || '')
@@ -31,7 +32,7 @@ export default function Mail() {
   const [clientSearch, setClientSearch] = useState('');
   const [extraEmails, setExtraEmails] = useState('');
   const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [body, setBody] = useState(MAIL_DEFAULT_BODY);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [colors, setColors] = useState({ ...DEFAULT_MAIL_COLORS });
 

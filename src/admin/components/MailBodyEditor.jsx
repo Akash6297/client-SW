@@ -9,6 +9,15 @@ import { MAIL_SNIPPETS, MAIL_MERGE_FIELDS } from '../config';
 export default function MailBodyEditor({ value, onChange, previewHtml }) {
   const textareaRef = useRef(null);
 
+  // Wrap the raw template HTML in a minimal document so the preview renders
+  // the way it will actually look in an inbox — centered on a neutral page
+  // background with sensible default typography — instead of unstyled
+  // content flush against a blank white iframe.
+  const previewDoc = `<!DOCTYPE html><html><head><meta charset="utf-8" /><style>
+    body { margin:0; padding:24px 16px; background:#f1f5f9; font-family:Arial,Helvetica,sans-serif; color:#1e293b; }
+    img { max-width:100%; }
+  </style></head><body>${previewHtml || ''}</body></html>`;
+
   const insertAtCursor = (text) => {
     const el = textareaRef.current;
     if (!el) {
@@ -70,7 +79,7 @@ export default function MailBodyEditor({ value, onChange, previewHtml }) {
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Live Preview</p>
         <iframe
           title="Email preview"
-          srcDoc={previewHtml}
+          srcDoc={previewDoc}
           sandbox=""
           className="w-full h-[420px] bg-white border border-slate-100 rounded-xl"
         />

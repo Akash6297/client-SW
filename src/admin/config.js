@@ -103,6 +103,48 @@ export const MAIL_SNIPPETS = [
   },
 ];
 
+// Starting point for new mail templates / a fresh compose — a complete,
+// professionally styled email (header, greeting, message, CTA, social links,
+// signature and footer) built from the same merge fields as MAIL_SNIPPETS so
+// it re-themes correctly with MailColorPicker and never renders as bare,
+// unstyled text.
+export const MAIL_DEFAULT_BODY = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;">
+  <div style="background:{{color_header}};padding:28px;text-align:center;">
+    <img src="{{logo_url}}" alt="{{business_name}}" style="max-height:44px;" />
+    <h2 style="margin:8px 0 0;font-family:Arial,sans-serif;color:#ffffff;">{{business_name}}</h2>
+  </div>
+
+  <div style="padding:32px 28px;">
+    <h2 style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:20px;color:{{color_header}};">Hi {{client_name}},</h2>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:{{color_text}};">
+      Write your message here. Share an update, an offer, or anything else you'd like {{client_name}} to know.
+    </p>
+
+    <p style="text-align:center;margin:28px 0;">
+      <a href="{{business_website}}" style="background:{{color_primary}};color:#ffffff;text-decoration:none;font-weight:bold;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:999px;display:inline-block;">Visit Our Website</a>
+    </p>
+
+    <p style="margin-top:24px;font-size:13px;color:#475569;">
+      Best regards,<br/>
+      <strong>{{business_name}}</strong><br/>
+      {{business_phone}}<br/>
+      {{business_website}}<br/>
+      {{business_address}}
+    </p>
+  </div>
+
+  <div style="text-align:center;padding:16px;border-top:1px solid #e2e8f0;">
+    <a href="{{social_instagram}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Instagram</a>
+    <a href="{{social_facebook}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Facebook</a>
+    <a href="{{social_linkedin}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">LinkedIn</a>
+    <a href="{{social_twitter}}" style="color:{{color_primary}};text-decoration:none;font-size:12px;font-weight:bold;margin:0 8px;">Twitter</a>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:#94a3b8;padding:16px 0;margin:0;">
+    &copy; {{current_year}} {{business_name}}. All rights reserved.
+  </p>
+</div>`;
+
 // Pages whose SEO meta tags can be managed from /admin/seo.
 // The "key" must match the pageKey passed to useSeoOverride() on each page.
 // default* fields mirror the hardcoded <SEOHead> props in each page — shown
